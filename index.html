@@ -533,6 +533,7 @@
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────
+const HUB_IP  = '192.168.87.237';  // GW3000B local IP — must be on home WiFi
 const API_KEY = '1d647789-d639-4c2b-afa9-1a01584a6b29';
 const MAC     = '6C:C8:40:13:39:AB';
 
@@ -597,24 +598,40 @@ function getColor(status) {
 async function fetchData() {
   document.getElementById('loader').classList.remove('hidden');
   document.getElementById('errorBox').classList.remove('show');
+  document.getElementById('alertBanner').classList.remove('show');
 
   try {
-    const url = `https://api.ecowitt.net/api/v3/device/real_time?application_key=${API_KEY}&api_key=${API_KEY}&mac=${MAC}&call_back=soil`;
-    const res = await fetch(url);
+    // Use GW3000 local API — must be on same WiFi network as hub
+    const url = `http://${HUB_IP}/get_livedata_info`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
 
-    if (json.code !== 0) throw new Error(json.msg || 'API error');
+    // Parse soil moisture from local API response
+    // Local API returns array of sensor objects with 'id' and 'val'
+    const soilSensors = (json.soil || []);
 
-    // Parse soil channels from response
-    const soil = json.data?.soil || {};
     sensorData = PLANTS.map(plant => {
-      const chKey = `soilmoisture${plant.ch}`;
-      const raw = soil[chKey];
-      const pct = raw ? parseFloat(raw.value) : null;
+      // Local API channels are 1-indexed, match by channel number
+      const sensor = soilSensors.find(s => parseInt(s.channel) === plant.ch);
+      const pct = sensor ? parseFloat(sensor.moisture) : null;
       const status = getStatus(pct, plant);
       return { ...plant, pct, status };
     });
+
+    // If no soil data found try alternate field names
+    const hasData = sensorData.some(s => s.pct !== null);
+    if (!hasData) {
+      // Try alternate parsing for different firmware versions
+      const common = json.common_list || [];
+      sensorData = PLANTS.map(plant => {
+        const key = `soilmoisture${plant.ch}`;
+        const entry = common.find(c => c.key === key || c.id === key);
+        const pct = entry ? parseFloat(entry.val || entry.value) : null;
+        const status = getStatus(pct, plant);
+        return { ...plant, pct, status };
+      });
+    }
 
     renderCards();
     updateSummary();
@@ -622,13 +639,18 @@ async function fetchData() {
     scheduleRefresh();
 
   } catch(err) {
-    // If CORS or network error, show demo mode with simulated data
-    if (err.message.includes('fetch') || err.message.includes('CORS') || err.message.includes('NetworkError') || err.message.includes('Failed')) {
-      loadDemoMode();
-    } else {
+    const isNetwork = err.message.includes('fetch') || err.message.includes('Failed') ||
+                      err.message.includes('NetworkError') || err.message.includes('timeout') ||
+                      err.name === 'AbortError' || err.name === 'TimeoutError';
+
+    if (isNetwork) {
+      // Likely not on home WiFi — show helpful message
       document.getElementById('errorBox').classList.add('show');
-      document.getElementById('errorMsg').textContent = `Error: ${err.message}. Check your API key and that your hub is online. The ECOWITT API may also require requests from a server rather than a browser — consider using the ECOWITT app directly or hosting this file on a server.`;
+      document.getElementById('errorMsg').textContent =
+        `Cannot reach hub at ${HUB_IP}. Make sure your device is connected to your home WiFi network (same network as the GW3000). This dashboard only works when you are on your home WiFi — it uses the hub's local IP address directly.`;
       updateStatus(false);
+    } else {
+      loadDemoMode();
     }
   } finally {
     document.getElementById('loader').classList.add('hidden');
@@ -645,7 +667,7 @@ function loadDemoMode() {
   });
 
   const banner = document.getElementById('alertBanner');
-  banner.innerHTML = '⚠️ <strong>Demo Mode:</strong> Showing sample data. Browser CORS policy prevents direct API calls — open this file via a local server (python3 -m http.server) or use the ECOWITT app for live readings. Channel assignments shown are based on your installation order.';
+  banner.innerHTML = '⚠️ <strong>Demo Mode:</strong> Showing sample data — could not reach hub at 192.168.87.237. Make sure you are on your home WiFi. Channel assignments are based on your sensor installation order.';
   banner.classList.add('show');
 
   renderCards();

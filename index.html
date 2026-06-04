@@ -533,9 +533,7 @@
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────
-const HUB_IP  = '192.168.87.237';  // GW3000B local IP — must be on home WiFi
-const API_KEY = '1d647789-d639-4c2b-afa9-1a01584a6b29';
-const MAC     = '6C:C8:40:13:39:AB';
+const PROXY_URL = 'https://garden-proxy.lemmetalkwithjustin.workers.dev/';
 
 // Plant definitions: channel maps to your actual sensor placement
 // Update channel numbers to match the order you installed sensors
@@ -601,37 +599,21 @@ async function fetchData() {
   document.getElementById('alertBanner').classList.remove('show');
 
   try {
-    // Use GW3000 local API — must be on same WiFi network as hub
-    const url = `http://${HUB_IP}/get_livedata_info`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    const res = await fetch(PROXY_URL, { signal: AbortSignal.timeout(10000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
 
-    // Parse soil moisture from local API response
-    // Local API returns array of sensor objects with 'id' and 'val'
-    const soilSensors = (json.soil || []);
+    if (json.code !== 0) throw new Error(json.msg || 'API error — check hub is online');
 
+    // Parse soil channels from ECOWITT cloud API response
+    const soil = json.data?.soil || {};
     sensorData = PLANTS.map(plant => {
-      // Local API channels are 1-indexed, match by channel number
-      const sensor = soilSensors.find(s => parseInt(s.channel) === plant.ch);
-      const pct = sensor ? parseFloat(sensor.moisture) : null;
+      const chKey = `soilmoisture${plant.ch}`;
+      const raw = soil[chKey];
+      const pct = raw ? parseFloat(raw.value) : null;
       const status = getStatus(pct, plant);
       return { ...plant, pct, status };
     });
-
-    // If no soil data found try alternate field names
-    const hasData = sensorData.some(s => s.pct !== null);
-    if (!hasData) {
-      // Try alternate parsing for different firmware versions
-      const common = json.common_list || [];
-      sensorData = PLANTS.map(plant => {
-        const key = `soilmoisture${plant.ch}`;
-        const entry = common.find(c => c.key === key || c.id === key);
-        const pct = entry ? parseFloat(entry.val || entry.value) : null;
-        const status = getStatus(pct, plant);
-        return { ...plant, pct, status };
-      });
-    }
 
     renderCards();
     updateSummary();
@@ -639,18 +621,14 @@ async function fetchData() {
     scheduleRefresh();
 
   } catch(err) {
-    const isNetwork = err.message.includes('fetch') || err.message.includes('Failed') ||
-                      err.message.includes('NetworkError') || err.message.includes('timeout') ||
-                      err.name === 'AbortError' || err.name === 'TimeoutError';
-
-    if (isNetwork) {
-      // Likely not on home WiFi — show helpful message
+    if (err.name === 'AbortError' || err.name === 'TimeoutError') {
       document.getElementById('errorBox').classList.add('show');
-      document.getElementById('errorMsg').textContent =
-        `Cannot reach hub at ${HUB_IP}. Make sure your device is connected to your home WiFi network (same network as the GW3000). This dashboard only works when you are on your home WiFi — it uses the hub's local IP address directly.`;
+      document.getElementById('errorMsg').textContent = 'Request timed out — check your internet connection and that the Cloudflare Worker is deployed.';
       updateStatus(false);
     } else {
-      loadDemoMode();
+      document.getElementById('errorBox').classList.add('show');
+      document.getElementById('errorMsg').textContent = `Error: ${err.message}`;
+      updateStatus(false);
     }
   } finally {
     document.getElementById('loader').classList.add('hidden');

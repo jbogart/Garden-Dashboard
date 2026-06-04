@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Justin's Garden — Live Moisture Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0F0A;
+    --bg2: #111811;
+    --bg3: #182018;
+    --green: #3DFF6E;
+    --green-dim: #1A7A32;
+    --yellow: #FFD93D;
+    --orange: #FF8C42;
+    --red: #FF4444;
+    --blue: #4ECDC4;
+    --text: #E8F5E8;
+    --text-dim: #6B8F6B;
+    --border: #1E2E1E;
+    --card: #0F160F;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inconsolata', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(61,255,110,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(61,255,110,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .logo-area {}
+
+  .logo-tag {
+    font-size: 10px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+  }
+
+  h1 span { color: var(--green); }
+
+  .header-meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .status-area { text-align: right; }
+
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(61,255,110,0.4); }
+    50% { opacity: .7; box-shadow: 0 0 0 6px rgba(61,255,110,0); }
+  }
+
+  .status-text { font-size: 12px; color: var(--green); }
+  .last-updated { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    display: none;
+    background: rgba(255,68,68,0.1);
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 1.5rem;
+    font-size: 13px;
+    color: var(--red);
+  }
+
+  .alert-banner.show { display: block; }
+
+  /* SUMMARY ROW */
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .summary-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .summary-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: 'Inconsolata', monospace;
+    font-size: 12px;
+    padding: 7px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    letter-spacing: .05em;
+    transition: all .15s;
+  }
+
+  .btn:hover { border-color: var(--green); color: var(--green); }
+  .btn.primary { background: var(--green); color: var(--bg); border-color: var(--green); font-weight: 600; }
+  .btn.primary:hover { background: #2de05e; }
+
+  .filter-btn { font-size: 11px; padding: 5px 12px; }
+  .filter-btn.active { border-color: var(--green); color: var(--green); }
+
+  /* SENSOR GRID */
+  .sensor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    margin-bottom: 2rem;
+  }
+
+  .sensor-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s, transform .2s;
+    animation: fadeIn .4s ease both;
+  }
+
+  .sensor-card:hover { transform: translateY(-2px); border-color: #2A3D2A; }
+
+  .sensor-card.urgent { border-color: var(--red); }
+  .sensor-card.urgent::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--red);
+  }
+
+  .sensor-card.warning { border-color: var(--orange); }
+  .sensor-card.warning::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--orange);
+  }
+
+  .sensor-card.good { border-color: var(--green-dim); }
+  .sensor-card.good::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--green);
+  }
+
+  .sensor-card.wet { border-color: var(--blue); }
+  .sensor-card.wet::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--blue);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .card-icon { font-size: 1.4rem; margin-bottom: 2px; }
+
+  .card-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .card-location {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-top: 2px;
+  }
+
+  .card-channel {
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--bg3);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  /* MOISTURE DISPLAY */
+  .moisture-display {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .moisture-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .moisture-unit {
+    font-size: 14px;
+    color: var(--text-dim);
+    padding-bottom: 6px;
+  }
+
+  .moisture-status {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .status-urgent { background: rgba(255,68,68,0.15); color: var(--red); }
+  .status-warning { background: rgba(255,140,66,0.15); color: var(--orange); }
+  .status-good { background: rgba(61,255,110,0.1); color: var(--green); }
+  .status-wet { background: rgba(78,205,196,0.1); color: var(--blue); }
+
+  /* PROGRESS BAR */
+  .bar-wrap {
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 99px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width .8s ease;
+  }
+
+  /* TARGET RANGE */
+  .target-range {
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .card-action {
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .action-urgent { background: rgba(255,68,68,0.1); color: var(--red); border: 1px solid rgba(255,68,68,0.2); }
+  .action-warning { background: rgba(255,140,66,0.08); color: var(--orange); border: 1px solid rgba(255,140,66,0.2); }
+  .action-good { background: rgba(61,255,110,0.05); color: var(--green-dim); border: 1px solid rgba(61,255,110,0.1); }
+  .action-wet { background: rgba(78,205,196,0.08); color: var(--blue); border: 1px solid rgba(78,205,196,0.2); }
+
+  /* LOADING STATE */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    gap: 16px;
+  }
+
+  .loading-overlay.hidden { display: none; }
+
+  .loader {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--border);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    color: var(--green);
+    letter-spacing: .1em;
+  }
+
+  /* ERROR STATE */
+  .error-box {
+    display: none;
+    background: rgba(255,68,68,0.05);
+    border: 1px solid rgba(255,68,68,0.3);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    margin: 2rem 0;
+  }
+
+  .error-box.show { display: block; }
+  .error-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; color: var(--red); margin-bottom: 8px; }
+  .error-msg { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .auto-refresh {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .refresh-toggle {
+    width: 32px;
+    height: 18px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    position: relative;
+    cursor: pointer;
+    transition: background .2s;
+  }
+
+  .refresh-toggle.on { background: var(--green-dim); border-color: var(--green); }
+
+  .toggle-knob {
+    width: 12px;
+    height: 12px;
+    background: var(--text-dim);
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: left .2s, background .2s;
+  }
+
+  .refresh-toggle.on .toggle-knob { left: 16px; background: var(--green); }
+
+  /* NO DATA state */
+  .no-data {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-dim);
+    font-size: 13px;
+    display: none;
+  }
+
+  .no-data.show { display: block; }
+
+  @media (max-width: 500px) {
+    .summary-row { grid-template-columns: repeat(2, 1fr); }
+    .sensor-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loader">
+  <div class="loader"></div>
+  <div class="loading-text">READING SENSORS...</div>
+</div>
+
+<div class="wrapper">
+
+  <header>
+    <div class="logo-area">
+      <div class="logo-tag">🌱 Live Garden Monitor</div>
+      <h1>Justin's Garden<br><span>Murrieta, CA</span></h1>
+      <div class="header-meta">GW3000B · 6C:C8:40:13:39:AB · Zone 10a</div>
+    </div>
+    <div class="status-area">
+      <div><span class="status-dot" id="statusDot"></span><span class="status-text" id="statusText">Connecting...</span></div>
+      <div class="last-updated" id="lastUpdated">—</div>
+      <div style="margin-top:8px">
+        <button class="btn primary" onclick="fetchData()" style="font-size:11px;padding:6px 14px">↻ Refresh Now</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="alert-banner" id="alertBanner"></div>
+
+  <div class="summary-row" id="summaryRow">
+    <div class="summary-card">
+      <div class="summary-num" id="sumTotal" style="color:var(--text)">—</div>
+      <div class="summary-label">Total Sensors</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" id="sumUrgent" style="color:var(--red)">—</div>
+      <div class="summary-label">Water Now</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" id="sumWarning" style="color:var(--orange)">—</div>
+      <div class="summary-label">Water Soon</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" id="sumGood" style="color:var(--green)">—</div>
+      <div class="summary-label">All Good</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" id="sumWet" style="color:var(--blue)">—</div>
+      <div class="summary-label">Too Wet</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="btn filter-btn" onclick="setFilter('urgent', this)">🔴 Water Now</button>
+    <button class="btn filter-btn" onclick="setFilter('warning', this)">🟠 Water Soon</button>
+    <button class="btn filter-btn" onclick="setFilter('good', this)">🟢 Good</button>
+    <button class="btn filter-btn" onclick="setFilter('wet', this)">🔵 Too Wet</button>
+    <div class="auto-refresh" style="margin-left:auto">
+      <span>Auto-refresh (15min)</span>
+      <div class="refresh-toggle on" id="autoToggle" onclick="toggleAuto()">
+        <div class="toggle-knob"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sensor-grid" id="sensorGrid"></div>
+  <div class="no-data" id="noData">No sensors match this filter.</div>
+  <div class="error-box" id="errorBox">
+    <div class="error-title">Unable to fetch sensor data</div>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <footer>
+    <div>Justin's Garden Dashboard · Murrieta CA · Built with ❤️ by Claude</div>
+    <div id="nextRefresh">Next refresh: —</div>
+  </footer>
+
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const API_KEY = '1d647789-d639-4c2b-afa9-1a01584a6b29';
+const MAC     = '6C:C8:40:13:39:AB';
+
+// Plant definitions: channel maps to your actual sensor placement
+// Update channel numbers to match the order you installed sensors
+const PLANTS = [
+  { ch: 1,  name: 'Space Master Cucumbers',   icon: '🥒', location: 'Bed 1 — Raised',      type: 'raised', min: 55, max: 70, critMin: 45 },
+  { ch: 2,  name: 'Crimson Sweet Watermelon', icon: '🍉', location: 'Bed 2 — Raised',      type: 'raised', min: 40, max: 60, critMin: 35 },
+  { ch: 3,  name: 'Cherokee Purple Tomato',   icon: '🍅', location: 'Center Bed 1',        type: 'raised', min: 50, max: 70, critMin: 40 },
+  { ch: 4,  name: 'Cherokee Purple Tomato',   icon: '🍅', location: 'Center Bed 2',        type: 'raised', min: 50, max: 70, critMin: 40 },
+  { ch: 5,  name: 'Roma Tomatoes',            icon: '🍅', location: 'Bed 4 — By Palm',     type: 'raised', min: 50, max: 70, critMin: 40 },
+  { ch: 6,  name: 'Roma + Marigolds',         icon: '🍅', location: 'Bed 5 — Raised',      type: 'raised', min: 50, max: 70, critMin: 40 },
+  { ch: 7,  name: 'Carrots',                  icon: '🥕', location: 'Bed 7 — Raised',      type: 'raised', min: 50, max: 60, critMin: 40 },
+  { ch: 8,  name: 'Beans + Basil',            icon: '🫘', location: 'Bed 8 — Raised',      type: 'raised', min: 45, max: 65, critMin: 35 },
+  { ch: 9,  name: 'Cucumbers + Banana Peppers', icon: '🥒', location: 'Bed 9 — Raised',   type: 'raised', min: 55, max: 65, critMin: 45 },
+  { ch: 10, name: 'Banana Peppers',           icon: '🌶️', location: 'Bed 10 — Raised',     type: 'raised', min: 50, max: 60, critMin: 40 },
+  { ch: 11, name: 'Sugar Bomb Tomatoes',      icon: '🍅', location: 'Grow Bag — 15gal',   type: 'bag',    min: 55, max: 70, critMin: 45 },
+  { ch: 12, name: 'Bell Peppers',             icon: '🌶️', location: 'Grow Bag — 10gal',   type: 'bag',    min: 55, max: 65, critMin: 45 },
+  { ch: 13, name: 'Poblano Peppers',          icon: '🌶️', location: 'Grow Bag — 10gal',   type: 'bag',    min: 50, max: 65, critMin: 40 },
+  { ch: 14, name: 'Jalapeños',               icon: '🌶️', location: 'Grow Bag — 10gal',   type: 'bag',    min: 50, max: 65, critMin: 40 },
+  { ch: 15, name: 'Arbol + Shishito Chiles', icon: '🌶️', location: 'Grow Bags',           type: 'bag',    min: 40, max: 60, critMin: 30 },
+  { ch: 16, name: 'Genovese Basil',           icon: '🌿', location: 'Grow Bag — 5gal',    type: 'bag',    min: 45, max: 60, critMin: 35 },
+];
+
+let currentFilter = 'all';
+let autoRefreshOn = true;
+let refreshTimer = null;
+let nextRefreshTime = null;
+let sensorData = [];
+
+// ─── STATUS HELPERS ──────────────────────────────────────
+function getStatus(pct, plant) {
+  if (pct === null) return 'unknown';
+  if (pct > plant.max + 10) return 'wet';
+  if (pct >= plant.min && pct <= plant.max) return 'good';
+  if (pct < plant.critMin) return 'urgent';
+  if (pct < plant.min) return 'warning';
+  if (pct > plant.max) return 'wet';
+  return 'good';
+}
+
+function getStatusLabel(status) {
+  return { urgent: 'Water Now', warning: 'Water Soon', good: 'On Track', wet: 'Too Wet', unknown: 'No Data' }[status] || '—';
+}
+
+function getAction(status, plant) {
+  const actions = {
+    urgent:  `⚠️ Water immediately — below critical threshold of ${plant.critMin}%`,
+    warning: `💧 Water today — getting low, check before noon`,
+    good:    `✅ No action needed — check again tomorrow morning`,
+    wet:     `🚫 Skip watering — soil too wet, risk of root rot`,
+    unknown: `❓ No reading — check sensor connection`,
+  };
+  return actions[status] || '';
+}
+
+function getColor(status) {
+  return { urgent: 'var(--red)', warning: 'var(--orange)', good: 'var(--green)', wet: 'var(--blue)', unknown: 'var(--text-dim)' }[status] || 'var(--text-dim)';
+}
+
+// ─── FETCH ───────────────────────────────────────────────
+async function fetchData() {
+  document.getElementById('loader').classList.remove('hidden');
+  document.getElementById('errorBox').classList.remove('show');
+
+  try {
+    const url = `https://api.ecowitt.net/api/v3/device/real_time?application_key=${API_KEY}&api_key=${API_KEY}&mac=${MAC}&call_back=soil`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+
+    if (json.code !== 0) throw new Error(json.msg || 'API error');
+
+    // Parse soil channels from response
+    const soil = json.data?.soil || {};
+    sensorData = PLANTS.map(plant => {
+      const chKey = `soilmoisture${plant.ch}`;
+      const raw = soil[chKey];
+      const pct = raw ? parseFloat(raw.value) : null;
+      const status = getStatus(pct, plant);
+      return { ...plant, pct, status };
+    });
+
+    renderCards();
+    updateSummary();
+    updateStatus(true);
+    scheduleRefresh();
+
+  } catch(err) {
+    // If CORS or network error, show demo mode with simulated data
+    if (err.message.includes('fetch') || err.message.includes('CORS') || err.message.includes('NetworkError') || err.message.includes('Failed')) {
+      loadDemoMode();
+    } else {
+      document.getElementById('errorBox').classList.add('show');
+      document.getElementById('errorMsg').textContent = `Error: ${err.message}. Check your API key and that your hub is online. The ECOWITT API may also require requests from a server rather than a browser — consider using the ECOWITT app directly or hosting this file on a server.`;
+      updateStatus(false);
+    }
+  } finally {
+    document.getElementById('loader').classList.add('hidden');
+  }
+}
+
+// Demo mode with realistic simulated data (fallback for browser CORS)
+function loadDemoMode() {
+  const demoValues = [62, 38, 55, 67, 44, 71, 50, 58, 48, 53, 72, 61, 56, 49, 41, 44];
+  sensorData = PLANTS.map((plant, i) => {
+    const pct = demoValues[i] ?? Math.floor(Math.random() * 60) + 25;
+    const status = getStatus(pct, plant);
+    return { ...plant, pct, status };
+  });
+
+  const banner = document.getElementById('alertBanner');
+  banner.innerHTML = '⚠️ <strong>Demo Mode:</strong> Showing sample data. Browser CORS policy prevents direct API calls — open this file via a local server (python3 -m http.server) or use the ECOWITT app for live readings. Channel assignments shown are based on your installation order.';
+  banner.classList.add('show');
+
+  renderCards();
+  updateSummary();
+  updateStatus(true, true);
+  scheduleRefresh();
+}
+
+// ─── RENDER ──────────────────────────────────────────────
+function renderCards() {
+  const grid = document.getElementById('sensorGrid');
+  const noData = document.getElementById('noData');
+
+  const filtered = currentFilter === 'all'
+    ? sensorData
+    : sensorData.filter(s => s.status === currentFilter);
+
+  noData.classList.toggle('show', filtered.length === 0);
+
+  grid.innerHTML = filtered.map((s, i) => {
+    const pctDisplay = s.pct !== null ? s.pct.toFixed(0) : '—';
+    const barPct = s.pct !== null ? Math.min(100, s.pct) : 0;
+    const color = getColor(s.status);
+    const delay = i * 0.05;
+
+    return `
+      <div class="sensor-card ${s.status}" style="animation-delay:${delay}s">
+        <div class="card-header">
+          <div>
+            <div class="card-icon">${s.icon}</div>
+            <div class="card-name">${s.name}</div>
+            <div class="card-location">${s.location}</div>
+          </div>
+          <div class="card-channel">CH${s.ch}</div>
+        </div>
+        <div class="moisture-display">
+          <div class="moisture-num" style="color:${color}">${pctDisplay}</div>
+          <div class="moisture-unit">%</div>
+          <div class="moisture-status status-${s.status}">${getStatusLabel(s.status)}</div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-fill" style="width:${barPct}%;background:${color}"></div>
+        </div>
+        <div class="target-range">
+          <span>Target: ${s.min}–${s.max}%</span>
+          <span>Critical min: ${s.critMin}%</span>
+        </div>
+        <div class="card-action action-${s.status}">${getAction(s.status, s)}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Urgent alert
+  const urgent = sensorData.filter(s => s.status === 'urgent');
+  const alertBanner = document.getElementById('alertBanner');
+  if (urgent.length > 0 && currentFilter === 'all') {
+    if (!alertBanner.classList.contains('show') || !alertBanner.innerHTML.includes('URGENT')) {
+      alertBanner.innerHTML = `🚨 <strong>URGENT:</strong> ${urgent.map(s => s.name).join(', ')} — moisture critically low. Water immediately.`;
+      alertBanner.classList.add('show');
+    }
+  }
+}
+
+function updateSummary() {
+  document.getElementById('sumTotal').textContent = sensorData.length;
+  document.getElementById('sumUrgent').textContent = sensorData.filter(s => s.status === 'urgent').length;
+  document.getElementById('sumWarning').textContent = sensorData.filter(s => s.status === 'warning').length;
+  document.getElementById('sumGood').textContent = sensorData.filter(s => s.status === 'good').length;
+  document.getElementById('sumWet').textContent = sensorData.filter(s => s.status === 'wet').length;
+}
+
+function updateStatus(online, demo = false) {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  const updated = document.getElementById('lastUpdated');
+  dot.style.background = online ? 'var(--green)' : 'var(--red)';
+  text.style.color = online ? 'var(--green)' : 'var(--red)';
+  text.textContent = demo ? 'DEMO MODE' : (online ? 'LIVE' : 'OFFLINE');
+  updated.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+}
+
+// ─── FILTER ──────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (sensorData.length) renderCards();
+}
+
+// ─── AUTO REFRESH ─────────────────────────────────────────
+function scheduleRefresh() {
+  clearTimeout(refreshTimer);
+  if (!autoRefreshOn) return;
+  nextRefreshTime = Date.now() + 15 * 60 * 1000;
+  updateNextRefreshLabel();
+  refreshTimer = setTimeout(fetchData, 15 * 60 * 1000);
+}
+
+function updateNextRefreshLabel() {
+  if (!nextRefreshTime || !autoRefreshOn) {
+    document.getElementById('nextRefresh').textContent = 'Auto-refresh: off';
+    return;
+  }
+  const mins = Math.max(0, Math.round((nextRefreshTime - Date.now()) / 60000));
+  document.getElementById('nextRefresh').textContent = `Next refresh: ${mins}m`;
+  setTimeout(updateNextRefreshLabel, 60000);
+}
+
+function toggleAuto() {
+  autoRefreshOn = !autoRefreshOn;
+  const toggle = document.getElementById('autoToggle');
+  toggle.classList.toggle('on', autoRefreshOn);
+  if (autoRefreshOn) { scheduleRefresh(); } else { clearTimeout(refreshTimer); updateNextRefreshLabel(); }
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+fetchData();
+</script>
+</body>
+</html>

@@ -538,22 +538,14 @@ const PROXY_URL = 'https://garden-proxy.lemmetalkwithjustin.workers.dev/';
 // Plant definitions: channel maps to your actual sensor placement
 // Update channel numbers to match the order you installed sensors
 const PLANTS = [
-  { ch: 1,  name: 'Space Master Cucumbers',   icon: '🥒', location: 'Bed 1 — Raised',      type: 'raised', min: 55, max: 70, critMin: 45 },
-  { ch: 2,  name: 'Crimson Sweet Watermelon', icon: '🍉', location: 'Bed 2 — Raised',      type: 'raised', min: 40, max: 60, critMin: 35 },
-  { ch: 3,  name: 'Cherokee Purple Tomato',   icon: '🍅', location: 'Center Bed 1',        type: 'raised', min: 50, max: 70, critMin: 40 },
-  { ch: 4,  name: 'Cherokee Purple Tomato',   icon: '🍅', location: 'Center Bed 2',        type: 'raised', min: 50, max: 70, critMin: 40 },
-  { ch: 5,  name: 'Roma Tomatoes',            icon: '🍅', location: 'Bed 4 — By Palm',     type: 'raised', min: 50, max: 70, critMin: 40 },
-  { ch: 6,  name: 'Roma + Marigolds',         icon: '🍅', location: 'Bed 5 — Raised',      type: 'raised', min: 50, max: 70, critMin: 40 },
-  { ch: 7,  name: 'Carrots',                  icon: '🥕', location: 'Bed 7 — Raised',      type: 'raised', min: 50, max: 60, critMin: 40 },
-  { ch: 8,  name: 'Beans + Basil',            icon: '🫘', location: 'Bed 8 — Raised',      type: 'raised', min: 45, max: 65, critMin: 35 },
-  { ch: 9,  name: 'Cucumbers + Banana Peppers', icon: '🥒', location: 'Bed 9 — Raised',   type: 'raised', min: 55, max: 65, critMin: 45 },
-  { ch: 10, name: 'Banana Peppers',           icon: '🌶️', location: 'Bed 10 — Raised',     type: 'raised', min: 50, max: 60, critMin: 40 },
-  { ch: 11, name: 'Sugar Bomb Tomatoes',      icon: '🍅', location: 'Grow Bag — 15gal',   type: 'bag',    min: 55, max: 70, critMin: 45 },
-  { ch: 12, name: 'Bell Peppers',             icon: '🌶️', location: 'Grow Bag — 10gal',   type: 'bag',    min: 55, max: 65, critMin: 45 },
-  { ch: 13, name: 'Poblano Peppers',          icon: '🌶️', location: 'Grow Bag — 10gal',   type: 'bag',    min: 50, max: 65, critMin: 40 },
-  { ch: 14, name: 'Jalapeños',               icon: '🌶️', location: 'Grow Bag — 10gal',   type: 'bag',    min: 50, max: 65, critMin: 40 },
-  { ch: 15, name: 'Arbol + Shishito Chiles', icon: '🌶️', location: 'Grow Bags',           type: 'bag',    min: 40, max: 60, critMin: 30 },
-  { ch: 16, name: 'Genovese Basil',           icon: '🌿', location: 'Grow Bag — 5gal',    type: 'bag',    min: 45, max: 60, critMin: 35 },
+  { ch: 1, name: 'Space Master Cucumbers',      icon: '🥒', location: 'Bed 1 — Raised',    type: 'raised', min: 55, max: 70, critMin: 45 },
+  { ch: 2, name: 'Crimson Sweet Watermelon',    icon: '🍉', location: 'Bed 2 — Raised',    type: 'raised', min: 40, max: 60, critMin: 35 },
+  { ch: 3, name: 'Cherokee Purple Tomato',      icon: '🍅', location: 'Center Bed 1',      type: 'raised', min: 50, max: 70, critMin: 40 },
+  { ch: 4, name: 'Cherokee Purple Tomato',      icon: '🍅', location: 'Center Bed 2',      type: 'raised', min: 50, max: 70, critMin: 40 },
+  { ch: 5, name: 'Roma Tomatoes',               icon: '🍅', location: 'Bed 4 — By Palm',   type: 'raised', min: 50, max: 70, critMin: 40 },
+  { ch: 6, name: 'Roma + Marigolds',            icon: '🍅', location: 'Bed 5 — Raised',    type: 'raised', min: 50, max: 70, critMin: 40 },
+  { ch: 7, name: 'Carrots',                     icon: '🥕', location: 'Bed 7 — Raised',    type: 'raised', min: 50, max: 60, critMin: 40 },
+  { ch: 8, name: 'Beans + Basil',               icon: '🫘', location: 'Bed 8 — Raised',    type: 'raised', min: 45, max: 65, critMin: 35 },
 ];
 
 let currentFilter = 'all';
@@ -605,11 +597,11 @@ async function fetchData() {
 
     if (json.code !== 0) throw new Error(json.msg || 'API error — check hub is online');
 
-    // Parse soil channels from ECOWITT cloud API response
-    const soil = json.data?.soil || {};
+    // Parse soil channels — ECOWITT returns soil_ch1, soil_ch2, etc.
+    const data = json.data || {};
     sensorData = PLANTS.map(plant => {
-      const chKey = `soilmoisture${plant.ch}`;
-      const raw = soil[chKey];
+      const chKey = `soil_ch${plant.ch}`;
+      const raw = data[chKey]?.soilmoisture;
       const pct = raw ? parseFloat(raw.value) : null;
       const status = getStatus(pct, plant);
       return { ...plant, pct, status };

@@ -1335,7 +1335,12 @@ function renderPhHistory() {
   console.log('Selected bed:', selectedBed);
   console.log('All stored beds:', allHistory.map(e => e.bed));
 
-  const history = allHistory.filter(e => e.bed === selectedBed);
+  const history = allHistory.filter(e => {
+    if (e.bed === selectedBed) return true;
+    const storedNum = e.bed.match(/^Bed (\d+)/i);
+    const selNum = selectedBed.match(/^Bed (\d+)/i);
+    return storedNum && selNum && storedNum[1] === selNum[1];
+  });
 
   const label = document.getElementById('phHistoryLabel');
   if (label) label.textContent = selectedBed + ' — History';
@@ -1427,9 +1432,17 @@ async function fetchData() {
       const ecRaw = data[`soil_ch${plant.ch}`]?.soilec || data[`soil_ch${plant.ch}`]?.ec;
       const ec = ecRaw ? parseFloat(ecRaw.value) : null;
 
-      // Get latest pH from localStorage
+      // Get latest pH from localStorage — fuzzy match by bed number
       const phHistory = getPhHistory();
-      const bedPh = phHistory.filter(e => e.bed === plant.location).sort((a,b) => b.ts - a.ts)[0];
+      const bedPh = phHistory
+        .filter(e => {
+          if (e.bed === plant.location) return true;
+          // Match by bed number e.g. "Bed 1" matches "Bed 1 — Potato + Cucumbers"
+          const storedNum = e.bed.match(/^Bed (\d+)/i);
+          const plantNum = plant.location.match(/^Bed (\d+)/i);
+          return storedNum && plantNum && storedNum[1] === plantNum[1];
+        })
+        .sort((a,b) => b.ts - a.ts)[0];
 
       return { ...plant, pct, status, soilTemp, ec, latestPh: bedPh ? bedPh.ph : null };
     });

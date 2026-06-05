@@ -538,14 +538,58 @@ const PROXY_URL = 'https://garden-proxy.lemmetalkwithjustin.workers.dev/';
 // Plant definitions: channel maps to your actual sensor placement
 // Update channel numbers to match the order you installed sensors
 const PLANTS = [
-  { ch: 1, name: 'Space Master Cucumbers',      icon: '🥒', location: 'Bed 1 — Raised',    type: 'raised', min: 55, max: 70, critMin: 45 },
-  { ch: 2, name: 'Crimson Sweet Watermelon',    icon: '🍉', location: 'Bed 2 — Raised',    type: 'raised', min: 40, max: 60, critMin: 35 },
-  { ch: 3, name: 'Cherokee Purple Tomato',      icon: '🍅', location: 'Center Bed 1',      type: 'raised', min: 50, max: 70, critMin: 40 },
-  { ch: 4, name: 'Cherokee Purple Tomato',      icon: '🍅', location: 'Center Bed 2',      type: 'raised', min: 50, max: 70, critMin: 40 },
-  { ch: 5, name: 'Roma Tomatoes',               icon: '🍅', location: 'Bed 4 — By Palm',   type: 'raised', min: 50, max: 70, critMin: 40 },
-  { ch: 6, name: 'Roma + Marigolds',            icon: '🍅', location: 'Bed 5 — Raised',    type: 'raised', min: 50, max: 70, critMin: 40 },
-  { ch: 7, name: 'Carrots',                     icon: '🥕', location: 'Bed 7 — Raised',    type: 'raised', min: 50, max: 60, critMin: 40 },
-  { ch: 8, name: 'Beans + Basil',               icon: '🫘', location: 'Bed 8 — Raised',    type: 'raised', min: 45, max: 65, critMin: 35 },
+  {
+    ch: 1, name: 'Russet Potato + Space Masters', icon: '🥔', location: 'Bed 1',
+    type: 'raised', min: 55, max: 70, critMin: 45,
+    plants: ['🥔 Russet Potato ×1', '🥒 Space Master Cucumbers ×2']
+  },
+  {
+    ch: 2, name: 'Watermelon + Russet Potato', icon: '🍉', location: 'Bed 2',
+    type: 'raised', min: 40, max: 60, critMin: 35,
+    plants: ['🍉 Crimson Sweet Watermelon ×2', '🥔 Russet Potato ×1']
+  },
+  {
+    ch: 3, name: 'Cucumbers + Tomatoes + Marigolds', icon: '🥒', location: 'Bed 3',
+    type: 'raised', min: 55, max: 70, critMin: 45,
+    plants: ['🥒 Space Master Cucumbers ×3', '🍅 Roma Tomato ×1', '🍅 Sugar Bomb Cherry ×1', '🌼 African Marigolds ×3']
+  },
+  {
+    ch: 4, name: 'Cucumber + Peas + Roma + Basil', icon: '🫛', location: 'Bed 4',
+    type: 'raised', min: 55, max: 70, critMin: 45,
+    plants: ['🥒 Space Master Cucumber ×1', '🫛 Sugar Daddy Peas ×4-5', '🍅 Roma Tomato ×1', '🌼 African Marigolds ×2', '🌿 Basil ×1']
+  },
+  {
+    ch: 5, name: 'Carrots', icon: '🥕', location: 'Bed 5',
+    type: 'raised', min: 50, max: 60, critMin: 40,
+    plants: ['🥕 Carrots (thinned, full bed)']
+  },
+  {
+    ch: 6, name: 'Beans + Alyssum + Chives + Basil', icon: '🫘', location: 'Bed 6',
+    type: 'raised', min: 50, max: 65, critMin: 40,
+    plants: ['🫘 Jade Bush Beans ×4', '🌸 Sweet Alyssum ×1', '🌱 Chives', '🌿 Basil ×1']
+  },
+  {
+    ch: 7, name: 'Space Masters + Banana Peppers', icon: '🥒', location: 'Bed 7',
+    type: 'raised', min: 55, max: 65, critMin: 45,
+    plants: ['🥒 Space Master Cucumbers ×2', '🌶️ Hot Banana Peppers ×2']
+  },
+  {
+    ch: 8, name: 'Habanero Peppers', icon: '🌶️', location: 'Bed 8',
+    type: 'raised', min: 45, max: 60, critMin: 35,
+    plants: ['🌶️ Habanero Peppers ×1.5 (shared with Bed 7)']
+  },
+];
+
+// Beds 9 & 10 — no sensors yet, shown as info only
+const NO_SENSOR_BEDS = [
+  {
+    name: 'Zinnias + Cabbage + Basil + Delphinium', icon: '🌸', location: 'Bed 9 — No sensor yet',
+    plants: ['🌸 Purple Zinnias ×3', '🥬 Cabbage ×3', '🌿 Basil ×1', '💐 Delphinium ×1']
+  },
+  {
+    name: 'Cherokee Purple + Banana Peppers', icon: '🍅', location: 'Bed 10 — No sensor yet',
+    plants: ['🍅 Cherokee Purple Tomatoes ×3', '🌶️ Sweet Banana Peppers ×2']
+  },
 ];
 
 let currentFilter = 'all';
@@ -657,11 +701,13 @@ function renderCards() {
 
   noData.classList.toggle('show', filtered.length === 0);
 
+  // Sensor beds
   grid.innerHTML = filtered.map((s, i) => {
     const pctDisplay = s.pct !== null ? s.pct.toFixed(0) : '—';
     const barPct = s.pct !== null ? Math.min(100, s.pct) : 0;
     const color = getColor(s.status);
     const delay = i * 0.05;
+    const plantList = s.plants ? s.plants.map(p => `<div style="font-size:11px;color:var(--text-dim);margin-top:2px">${p}</div>`).join('') : '';
 
     return `
       <div class="sensor-card ${s.status}" style="animation-delay:${delay}s">
@@ -673,7 +719,8 @@ function renderCards() {
           </div>
           <div class="card-channel">CH${s.ch}</div>
         </div>
-        <div class="moisture-display">
+        ${plantList}
+        <div class="moisture-display" style="margin-top:10px">
           <div class="moisture-num" style="color:${color}">${pctDisplay}</div>
           <div class="moisture-unit">%</div>
           <div class="moisture-status status-${s.status}">${getStatusLabel(s.status)}</div>
@@ -689,6 +736,29 @@ function renderCards() {
       </div>
     `;
   }).join('');
+
+  // No-sensor beds (always shown at bottom when filter is 'all')
+  if (currentFilter === 'all' && typeof NO_SENSOR_BEDS !== 'undefined') {
+    grid.innerHTML += NO_SENSOR_BEDS.map((b, i) => {
+      const plantList = b.plants.map(p => `<div style="font-size:11px;color:var(--text-dim);margin-top:2px">${p}</div>`).join('');
+      return `
+        <div class="sensor-card" style="border-color:#2A3A2A;opacity:0.7;animation-delay:${(filtered.length + i) * 0.05}s">
+          <div class="card-header">
+            <div>
+              <div class="card-icon">${b.icon}</div>
+              <div class="card-name">${b.name}</div>
+              <div class="card-location">${b.location}</div>
+            </div>
+            <div class="card-channel" style="color:var(--text-dim)">NO CH</div>
+          </div>
+          ${plantList}
+          <div class="card-action" style="background:rgba(100,100,100,0.1);color:var(--text-dim);border:1px solid #2A3A2A;margin-top:12px">
+            📡 Install sensor to get live readings
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 
   // Urgent alert
   const urgent = sensorData.filter(s => s.status === 'urgent');

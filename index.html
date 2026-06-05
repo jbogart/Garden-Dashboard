@@ -1366,28 +1366,22 @@ function deletePhEntry(i) {
 }
 
 function openPhModal(bedName) {
-  renderPhHistory();
+  const select = document.getElementById('phBedSelect');
+
+  // Set dropdown FIRST before rendering history
   if (bedName) {
-    const select = document.getElementById('phBedSelect');
-    // Extract bed number from location e.g. "Bed 1" -> match "Bed 1 —..."
-    // or match full name directly
-    let matched = false;
     for (let i = 0; i < select.options.length; i++) {
       const optVal = select.options[i].value;
-      // Try exact match first
-      if (optVal === bedName) { select.selectedIndex = i; matched = true; break; }
-      // Try prefix match — "Bed 1" matches "Bed 1 — Potato + Cucumbers"
-      if (optVal.startsWith(bedName + ' —') || optVal.startsWith(bedName + '—')) {
-        select.selectedIndex = i; matched = true; break;
-      }
-      // Try extracting bed number from both and comparing
+      if (optVal === bedName) { select.selectedIndex = i; break; }
+      if (optVal.startsWith(bedName + ' —') || optVal.startsWith(bedName + '—')) { select.selectedIndex = i; break; }
       const optNum = optVal.match(/^Bed (\d+)/i);
       const nameNum = bedName.match(/^Bed (\d+)/i);
-      if (optNum && nameNum && optNum[1] === nameNum[1]) {
-        select.selectedIndex = i; matched = true; break;
-      }
+      if (optNum && nameNum && optNum[1] === nameNum[1]) { select.selectedIndex = i; break; }
     }
   }
+
+  // Render history AFTER dropdown is set so filter uses correct value
+  renderPhHistory();
   document.getElementById('phModal').classList.add('show');
 }
 

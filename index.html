@@ -856,7 +856,7 @@
       <div class="ph-form">
         <div>
           <label>Bed</label>
-          <select id="phBedSelect">
+          <select id="phBedSelect" onchange="renderPhHistory()">
             <option value="Bed 1 — Potato + Cucumbers">Bed 1 — Potato + Cucumbers</option>
             <option value="Bed 2 — Watermelon + Potato">Bed 2 — Watermelon + Potato</option>
             <option value="Bed 3 — Cucumbers + Tomatoes">Bed 3 — Cucumbers + Tomatoes</option>
@@ -881,7 +881,7 @@
         <button class="btn primary" onclick="logPh()">Save pH Reading</button>
       </div>
       <div class="ph-history">
-        <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">History</div>
+        <div id="phHistoryLabel" style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">History</div>
         <div id="phHistoryList"></div>
       </div>
     </div>
@@ -1328,15 +1328,26 @@ function logPh() {
 
 function renderPhHistory() {
   const list = document.getElementById('phHistoryList');
-  const history = getPhHistory();
-  if (!history.length) { list.innerHTML = '<div class="no-ph">No pH readings logged yet</div>'; return; }
-  list.innerHTML = history.slice(0, 30).map((e, i) => {
+  const selectedBed = document.getElementById('phBedSelect').value;
+  const allHistory = getPhHistory();
+  const history = allHistory.filter(e => e.bed === selectedBed);
+
+  const label = document.getElementById('phHistoryLabel');
+  if (label) label.textContent = selectedBed + ' — History';
+
+  if (!history.length) {
+    list.innerHTML = '<div class="no-ph">No pH readings logged for this bed yet.</div>';
+    return;
+  }
+
+  // Use original indices for deletion so we delete from full array
+  list.innerHTML = history.slice(0, 30).map(e => {
+    const origIndex = allHistory.indexOf(e);
     const cls = e.ph < 5.8 ? 'color:var(--orange)' : e.ph > 7.0 ? 'color:var(--blue)' : 'color:var(--green)';
     return `<div class="ph-entry">
-      <span class="ph-entry-bed">${e.bed}</span>
       <span class="ph-entry-val" style="${cls}">pH ${e.ph}</span>
       <span class="ph-entry-date">${e.date}${e.notes ? ' · ' + e.notes : ''}</span>
-      <button class="ph-delete" onclick="deletePhEntry(${i})">✕</button>
+      <button class="ph-delete" onclick="deletePhEntry(${origIndex})">✕</button>
     </div>`;
   }).join('');
 }

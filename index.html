@@ -1330,17 +1330,23 @@ function renderPhHistory() {
   const list = document.getElementById('phHistoryList');
   const selectedBed = document.getElementById('phBedSelect').value;
   const allHistory = getPhHistory();
+
+  // Debug: show all stored bed names vs selected
+  console.log('Selected bed:', selectedBed);
+  console.log('All stored beds:', allHistory.map(e => e.bed));
+
   const history = allHistory.filter(e => e.bed === selectedBed);
 
   const label = document.getElementById('phHistoryLabel');
   if (label) label.textContent = selectedBed + ' — History';
 
   if (!history.length) {
-    list.innerHTML = '<div class="no-ph">No pH readings logged for this bed yet.</div>';
+    // Show stored bed names to help debug mismatches
+    const storedBeds = [...new Set(allHistory.map(e => e.bed))];
+    list.innerHTML = `<div class="no-ph">No pH readings for this bed yet.${storedBeds.length ? '<br><span style="font-size:10px;opacity:0.5">Logged beds: ' + storedBeds.join(', ') + '</span>' : ''}</div>`;
     return;
   }
 
-  // Use original indices for deletion so we delete from full array
   list.innerHTML = history.slice(0, 30).map(e => {
     const origIndex = allHistory.indexOf(e);
     const cls = e.ph < 5.8 ? 'color:var(--orange)' : e.ph > 7.0 ? 'color:var(--blue)' : 'color:var(--green)';

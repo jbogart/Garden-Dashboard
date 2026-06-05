@@ -641,18 +641,9 @@
           <rect x="230" y="140" width="340" height="280" rx="8" fill="rgba(61,255,110,0.02)" stroke="rgba(61,255,110,0.15)" stroke-width="1.5" stroke-dasharray="6,4"/>
           <text x="400" y="158" fill="rgba(61,255,110,0.25)" font-size="9" font-family="Inconsolata" text-anchor="middle" letter-spacing="2">SHADE CLOTH</text>
 
-          <!-- House/Patio - West side -->
-          <rect x="0" y="200" width="55" height="160" rx="0" fill="#182018"/>
-          <text x="27" y="268" fill="rgba(255,255,255,0.2)" font-size="8" font-family="Inconsolata" text-anchor="middle" transform="rotate(-90,27,275)">PATIO</text>
-
-          <!-- Pergola structure -->
-          <rect x="62" y="290" width="130" height="100" rx="6" fill="rgba(139,99,71,0.1)" stroke="rgba(139,99,71,0.3)" stroke-width="1.5" stroke-dasharray="4,3"/>
-          <text x="127" y="345" fill="rgba(139,99,71,0.5)" font-size="9" font-family="Inconsolata" text-anchor="middle">PERGOLA</text>
-
-          <!-- Firepit area -->
-          <circle cx="185" cy="460" r="28" fill="rgba(255,140,66,0.05)" stroke="rgba(255,140,66,0.2)" stroke-width="1.5" stroke-dasharray="4,3"/>
-          <text x="185" y="464" fill="rgba(255,140,66,0.35)" font-size="8" font-family="Inconsolata" text-anchor="middle">FIRE</text>
-          <text x="185" y="474" fill="rgba(255,140,66,0.35)" font-size="8" font-family="Inconsolata" text-anchor="middle">PIT</text>
+          <!-- Pergola — north edge inline with bed 8 north (y=300), south at fence -->
+          <rect x="62" y="300" width="220" height="185" rx="6" fill="rgba(139,99,71,0.07)" stroke="rgba(139,99,71,0.3)" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <text x="172" y="396" fill="rgba(139,99,71,0.45)" font-size="9" font-family="Inconsolata" text-anchor="middle">P E R G O L A</text>
 
           <!-- Fence lines -->
           <!-- South fence -->
@@ -671,58 +662,72 @@
 
           <!-- BED GROUPS -->
 
-          <!-- Beds 1 & 2 — South fence, east corner -->
-          <!-- Bed 1 -->
+          <!-- Beds 1 & 2 — South fence, east corner (swapped: bed2 leftmost, bed1 rightmost) -->
+
+
+          <!-- Bed 1 (right, at east corner) -->
           <g id="mapBed1" onclick="mapBedClick(0)" style="cursor:pointer">
-            <rect id="mapRect1" x="620" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
-            <text x="660" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 1</text>
-            <text x="660" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🥔🥒</text>
-            <text id="mapPct1" x="660" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
+            <rect id="mapRect1" x="704" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
+            <text x="744" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 1</text>
+            <text x="744" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🥔🥒</text>
+            <text id="mapPct1" x="744" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
           </g>
 
-          <!-- Bed 2 -->
-          <g id="mapBed2" onclick="mapBedClick(1)" style="cursor:pointer">
-            <rect id="mapRect2" x="710" y="490" width="74" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
-            <text x="747" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 2</text>
-            <text x="747" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🍉🥔</text>
-            <text id="mapPct2" x="747" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
-          </g>
+          <!-- Firepit — between beds 1&2 and beds 3-6, slightly in front -->
+          <!-- Firepit — rectangular, 3:1 ratio, widest parallel to south fence -->
+          <rect x="446" y="453" width="168" height="56" rx="8" fill="rgba(255,140,66,0.05)" stroke="rgba(255,140,66,0.2)" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="530" y="476" fill="rgba(255,140,66,0.35)" font-size="8" font-family="Inconsolata" text-anchor="middle">FIRE PIT</text>
 
-          <!-- Beds 3-6 — South fence, separated by firepit -->
-          <!-- Bed 3 -->
-          <g id="mapBed3" onclick="mapBedClick(2)" style="cursor:pointer">
-            <rect id="mapRect3" x="240" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
-            <text x="280" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 3</text>
-            <text x="280" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🥒🍅</text>
-            <text id="mapPct3" x="280" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
-          </g>
-
-          <!-- Bed 4 -->
-          <g id="mapBed4" onclick="mapBedClick(3)" style="cursor:pointer">
-            <rect id="mapRect4" x="328" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
-            <text x="368" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 4</text>
-            <text x="368" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🥒🫛🍅</text>
-            <text id="mapPct4" x="368" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
-          </g>
-
-          <!-- Bed 5 -->
-          <g id="mapBed5" onclick="mapBedClick(4)" style="cursor:pointer">
-            <rect id="mapRect5" x="416" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
-            <text x="456" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 5</text>
-            <text x="456" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🥕</text>
-            <text id="mapPct5" x="456" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
-          </g>
-
-          <!-- Bed 6 -->
+          <!-- Beds 3-6 — South fence, reversed order (6 leftmost at corner, 3 rightmost toward firepit) -->
+          <!-- Bed 6 (centered under pergola, leftmost) -->
           <g id="mapBed6" onclick="mapBedClick(5)" style="cursor:pointer">
-            <rect id="mapRect6" x="504" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
-            <text x="544" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 6</text>
-            <text x="544" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🫘🌸🌿</text>
-            <text id="mapPct6" x="544" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
+            <rect id="mapRect6" x="62" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
+            <text x="102" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 6</text>
+            <text x="102" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🫘🌸🌿</text>
+            <text id="mapPct6" x="102" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
           </g>
 
-          <!-- Beds 7 & 8 — West fence -->
-          <!-- Bed 7 -->
+          <!-- Bed 5 (centered under pergola, rightmost of pair) -->
+          <g id="mapBed5" onclick="mapBedClick(4)" style="cursor:pointer">
+            <rect id="mapRect5" x="148" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
+            <text x="188" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 5</text>
+            <text x="188" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🥕</text>
+            <text id="mapPct5" x="188" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
+          </g>
+
+          <!-- Bougainvillea — just east of bed 5 -->
+          <g opacity="0.7">
+            <circle cx="246" cy="507" r="16" fill="#1A0A10" stroke="#3A1525" stroke-width="1.5"/>
+            <text x="246" y="503" fill="rgba(255,100,150,0.6)" font-size="11" font-family="Inconsolata" text-anchor="middle">🌸</text>
+            <text x="246" y="516" fill="rgba(255,100,150,0.35)" font-size="7" font-family="Inconsolata" text-anchor="middle">Boug.</text>
+          </g>
+
+          <!-- Bed 4 — just east of bougainvillea, west of firepit -->
+          <g id="mapBed4" onclick="mapBedClick(3)" style="cursor:pointer">
+            <rect id="mapRect4" x="266" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
+            <text x="306" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 4</text>
+            <text x="306" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🥒🫛🍅</text>
+            <text id="mapPct4" x="306" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
+          </g>
+
+          <!-- Bed 3 — just east of bed 4, west of firepit -->
+          <g id="mapBed3" onclick="mapBedClick(2)" style="cursor:pointer">
+            <rect id="mapRect3" x="346" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
+            <text x="386" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 3</text>
+            <text x="386" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🥒🍅</text>
+            <text id="mapPct3" x="386" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
+          </g>
+
+          <!-- Bed 2 — just east of firepit (where bed 3 was) -->
+          <g id="mapBed2b" onclick="mapBedClick(1)" style="cursor:pointer">
+            <rect id="mapRect2b" x="620" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
+            <text x="660" y="508" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 2</text>
+            <text x="660" y="519" fill="rgba(255,255,255,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">🍉🥔</text>
+            <text id="mapPct2b" x="660" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
+          </g>
+
+          <!-- Beds 7 & 8 — West fence (above bed 6) -->
+          <!-- Bed 7 (lower, closer to bed 6) -->
           <g id="mapBed7" onclick="mapBedClick(6)" style="cursor:pointer">
             <rect id="mapRect7" x="16" y="390" width="44" height="80" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
             <text x="38" y="410" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">B7</text>
@@ -731,7 +736,7 @@
             <text id="mapPct7" x="38" y="463" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
           </g>
 
-          <!-- Bed 8 -->
+          <!-- Bed 8 (higher up west fence) -->
           <g id="mapBed8" onclick="mapBedClick(7)" style="cursor:pointer">
             <rect id="mapRect8" x="16" y="300" width="44" height="80" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
             <text x="38" y="320" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">B8</text>
@@ -739,61 +744,65 @@
             <text id="mapPct8" x="38" y="373" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
           </g>
 
-          <!-- Beds 9 & 10 — Center under shade cloth -->
-          <!-- Bed 9 -->
-          <g id="mapBed9" onclick="mapBedClick(8)" style="cursor:pointer">
-            <rect id="mapRect9" x="270" y="290" width="110" height="60" rx="5" fill="#131F13" stroke="#1E2E1E" stroke-width="1.5" stroke-dasharray="4,3"/>
-            <text x="325" y="312" fill="rgba(255,255,255,0.35)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 9</text>
-            <text x="325" y="325" fill="rgba(255,255,255,0.2)" font-size="7" font-family="Inconsolata" text-anchor="middle">🌸🥬🌿</text>
-            <text id="mapPct9" x="325" y="342" fill="rgba(255,255,255,0.2)" font-size="9" font-family="Syne,sans-serif" text-anchor="middle">NO SENSOR</text>
-          </g>
-
-          <!-- Bed 10 -->
+          <!-- Beds 9 & 10 — Center under shade cloth, stacked vertically, centered -->
+          <!-- Bed 10 (top) -->
           <g id="mapBed10" onclick="mapBedClick(9)" style="cursor:pointer">
-            <rect id="mapRect10" x="420" y="290" width="110" height="60" rx="5" fill="#131F13" stroke="#1E2E1E" stroke-width="1.5" stroke-dasharray="4,3"/>
-            <text x="475" y="312" fill="rgba(255,255,255,0.35)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 10</text>
-            <text x="475" y="325" fill="rgba(255,255,255,0.2)" font-size="7" font-family="Inconsolata" text-anchor="middle">🍅🌶️</text>
-            <text id="mapPct10" x="475" y="342" fill="rgba(255,255,255,0.2)" font-size="9" font-family="Syne,sans-serif" text-anchor="middle">NO SENSOR</text>
+            <rect id="mapRect10" x="315" y="230" width="170" height="55" rx="5" fill="#131F13" stroke="#1E2E1E" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="400" y="250" fill="rgba(255,255,255,0.35)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 10</text>
+            <text x="400" y="263" fill="rgba(255,255,255,0.2)" font-size="7" font-family="Inconsolata" text-anchor="middle">🍅🌶️</text>
+            <text id="mapPct10" x="400" y="277" fill="rgba(255,255,255,0.2)" font-size="9" font-family="Syne,sans-serif" text-anchor="middle">NO SENSOR</text>
           </g>
 
-          <!-- Grow bags cluster — near patio -->
+          <!-- Bed 9 (below bed 10) -->
+          <g id="mapBed9" onclick="mapBedClick(8)" style="cursor:pointer">
+            <rect id="mapRect9" x="315" y="295" width="170" height="55" rx="5" fill="#131F13" stroke="#1E2E1E" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="400" y="315" fill="rgba(255,255,255,0.35)" font-size="8" font-family="Inconsolata" text-anchor="middle" font-weight="bold">BED 9</text>
+            <text x="400" y="328" fill="rgba(255,255,255,0.2)" font-size="7" font-family="Inconsolata" text-anchor="middle">🌸🥬🌿</text>
+            <text id="mapPct9" x="400" y="342" fill="rgba(255,255,255,0.2)" font-size="9" font-family="Syne,sans-serif" text-anchor="middle">NO SENSOR</text>
+          </g>
+
+
+
+          <!-- Dragon fruit — against west fence, just above bed 8 -->
           <g opacity="0.6">
-            <circle cx="90" cy="230" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
-            <circle cx="110" cy="248" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
-            <circle cx="90" cy="265" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
-            <circle cx="110" cy="210" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
-            <circle cx="130" cy="230" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
-            <circle cx="130" cy="265" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
-            <text x="110" y="290" fill="rgba(255,255,255,0.15)" font-size="7" font-family="Inconsolata" text-anchor="middle">GROW BAGS</text>
+            <rect x="16" y="218" width="44" height="74" rx="5" fill="#1A1510" stroke="#2A2015" stroke-width="1.5"/>
+            <text x="38" y="240" fill="rgba(255,200,100,0.5)" font-size="11" font-family="Inconsolata" text-anchor="middle">🐉</text>
+            <text x="38" y="254" fill="rgba(255,200,100,0.4)" font-size="7" font-family="Inconsolata" text-anchor="middle">Dragon</text>
+            <text x="38" y="264" fill="rgba(255,200,100,0.4)" font-size="7" font-family="Inconsolata" text-anchor="middle">Fruit</text>
           </g>
 
-          <!-- Dragon fruit + citrus area — east side -->
-          <g opacity="0.5">
-            <rect x="720" y="200" width="65" height="80" rx="6" fill="#1A1510" stroke="#2A2015" stroke-width="1"/>
-            <text x="752" y="236" fill="rgba(255,200,100,0.4)" font-size="8" font-family="Inconsolata" text-anchor="middle">🐉 Dragon</text>
-            <text x="752" y="248" fill="rgba(255,200,100,0.4)" font-size="8" font-family="Inconsolata" text-anchor="middle">Fruit</text>
-            <text x="752" y="260" fill="rgba(255,200,100,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">+ Citrus</text>
-          </g>
-
-          <!-- Bougainvillea — corner bed 6/7 area -->
-          <g opacity="0.5">
-            <rect x="16" y="480" width="44" height="54" rx="5" fill="#1A0A10" stroke="#2A1020" stroke-width="1"/>
-            <text x="38" y="502" fill="rgba(255,100,150,0.4)" font-size="7" font-family="Inconsolata" text-anchor="middle">🌸 Boug-</text>
-            <text x="38" y="513" fill="rgba(255,100,150,0.4)" font-size="7" font-family="Inconsolata" text-anchor="middle">ainville</text>
-          </g>
-
-          <!-- Apple tree -->
+          <!-- Orange tree — north of dragon fruit, against west fence -->
           <g opacity="0.6">
-            <circle cx="680" cy="120" r="20" fill="#1A1A0A" stroke="#2A2A15" stroke-width="1"/>
-            <text x="680" y="117" fill="rgba(200,200,100,0.4)" font-size="8" font-family="Inconsolata" text-anchor="middle">🍎</text>
-            <text x="680" y="128" fill="rgba(200,200,100,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">Apple</text>
+            <rect x="16" y="150" width="44" height="60" rx="5" fill="#1A1505" stroke="#2A2010" stroke-width="1.5"/>
+            <text x="38" y="172" fill="rgba(255,180,50,0.5)" font-size="11" font-family="Inconsolata" text-anchor="middle">🍊</text>
+            <text x="38" y="186" fill="rgba(255,180,50,0.4)" font-size="7" font-family="Inconsolata" text-anchor="middle">Orange</text>
+            <text x="38" y="196" fill="rgba(255,180,50,0.4)" font-size="7" font-family="Inconsolata" text-anchor="middle">Tree</text>
           </g>
 
-          <!-- Mango tree -->
+          <!-- Lime tree — east fence, north side parallel to shade cloth -->
           <g opacity="0.6">
-            <circle cx="120" cy="120" r="18" fill="#1A150A" stroke="#2A2010" stroke-width="1"/>
-            <text x="120" y="117" fill="rgba(200,180,80,0.4)" font-size="8" font-family="Inconsolata" text-anchor="middle">🥭</text>
-            <text x="120" y="128" fill="rgba(200,180,80,0.3)" font-size="7" font-family="Inconsolata" text-anchor="middle">Mango</text>
+            <rect x="742" y="140" width="44" height="60" rx="5" fill="#0A1A0A" stroke="#1A2A1A" stroke-width="1.5"/>
+            <text x="764" y="162" fill="rgba(150,220,80,0.5)" font-size="11" font-family="Inconsolata" text-anchor="middle">🍋</text>
+            <text x="764" y="176" fill="rgba(150,220,80,0.4)" font-size="7" font-family="Inconsolata" text-anchor="middle">Lime</text>
+            <text x="764" y="186" fill="rgba(150,220,80,0.4)" font-size="7" font-family="Inconsolata" text-anchor="middle">Tree</text>
+          </g>
+
+          <!-- Apple tree — where grow bags used to be -->
+          <g opacity="0.6">
+            <circle cx="93" cy="210" r="22" fill="#1A1A0A" stroke="#2A2A15" stroke-width="1.5"/>
+            <text x="93" y="206" fill="rgba(200,200,100,0.5)" font-size="11" font-family="Inconsolata" text-anchor="middle">🍎</text>
+            <text x="93" y="220" fill="rgba(200,200,100,0.35)" font-size="7" font-family="Inconsolata" text-anchor="middle">Apple</text>
+          </g>
+
+          <!-- Grow bags — vertical row left of beds 9 & 10 -->
+          <g opacity="0.6">
+            <circle cx="285" cy="237" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
+            <circle cx="285" cy="258" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
+            <circle cx="285" cy="279" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
+            <circle cx="285" cy="300" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
+            <circle cx="285" cy="321" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
+            <circle cx="285" cy="342" r="10" fill="#1A1A2A" stroke="#2A2A4A" stroke-width="1"/>
+            <text x="285" y="362" fill="rgba(255,255,255,0.15)" font-size="7" font-family="Inconsolata" text-anchor="middle">BAGS</text>
           </g>
 
         </svg>
@@ -1681,25 +1690,27 @@ function updateMap() {
 
   sensorData.forEach((s, i) => {
     const bedNum = s.ch;
-    const rect = document.getElementById(`mapRect${bedNum}`);
-    const pctEl = document.getElementById(`mapPct${bedNum}`);
-    if (!rect || !pctEl) return;
-
     const color = BED_COLORS[s.status] || BED_COLORS.unknown;
     const stroke = BED_STROKE[s.status] || BED_STROKE.unknown;
 
-    rect.setAttribute('fill', s.pct !== null ? color + '22' : '#131F13');
-    rect.setAttribute('stroke', stroke);
-    rect.setAttribute('stroke-width', s.status === 'urgent' ? '2.5' : '1.5');
+    // Update all elements matching this channel (handles duplicate IDs like mapRect2b)
+    const ids = [`mapRect${bedNum}`, `mapRect${bedNum}b`];
+    const pctIds = [`mapPct${bedNum}`, `mapPct${bedNum}b`];
 
-    pctEl.setAttribute('fill', color);
-    pctEl.textContent = s.pct !== null ? s.pct.toFixed(0) + '%' : '—%';
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('fill', s.pct !== null ? color + '22' : '#131F13');
+      el.setAttribute('stroke', stroke);
+      el.setAttribute('stroke-width', s.status === 'urgent' ? '2.5' : '1.5');
+    });
 
-    // Pulse animation for urgent beds
-    if (s.status === 'urgent') {
-      rect.style.animation = 'none';
-      rect.setAttribute('opacity', '1');
-    }
+    pctIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('fill', color);
+      el.textContent = s.pct !== null ? s.pct.toFixed(0) + '%' : '—%';
+    });
   });
 }
 

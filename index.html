@@ -344,6 +344,48 @@
   .action-good { background: rgba(61,255,110,0.05); color: var(--green-dim); border: 1px solid rgba(61,255,110,0.1); }
   .action-wet { background: rgba(78,205,196,0.08); color: var(--blue); border: 1px solid rgba(78,205,196,0.2); }
 
+  /* TEMP + pH METRICS */
+  .metrics-row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .metric-chip { display: flex; align-items: center; gap: 5px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 11px; }
+  .metric-icon { font-size: 12px; }
+  .metric-val { font-weight: 600; color: var(--text); }
+  .metric-label { color: var(--text-dim); }
+  .metric-chip.temp-hot { border-color: rgba(255,140,66,0.4); }
+  .metric-chip.temp-hot .metric-val { color: var(--orange); }
+  .metric-chip.temp-warn { border-color: rgba(255,212,61,0.4); }
+  .metric-chip.temp-warn .metric-val { color: var(--yellow); }
+  .metric-chip.temp-ok .metric-val { color: var(--green); }
+  .metric-chip.ph-low { border-color: rgba(255,140,66,0.4); }
+  .metric-chip.ph-low .metric-val { color: var(--orange); }
+  .metric-chip.ph-high { border-color: rgba(78,205,196,0.4); }
+  .metric-chip.ph-high .metric-val { color: var(--blue); }
+  .metric-chip.ph-ok .metric-val { color: var(--green); }
+  .metric-chip.ec-low { border-color: rgba(255,212,61,0.4); }
+  .metric-chip.ec-low .metric-val { color: var(--yellow); }
+  .metric-chip.ec-high { border-color: rgba(255,68,68,0.4); }
+  .metric-chip.ec-high .metric-val { color: var(--red); }
+  .metric-chip.ec-ok .metric-val { color: var(--green); }
+
+  /* pH LOG MODAL */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; align-items:center; justify-content:center; }
+  .modal-overlay.show { display:flex; }
+  .modal { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:24px; width:90%; max-width:480px; max-height:80vh; overflow-y:auto; }
+  .modal-title { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+  .modal-close { cursor:pointer; color:var(--text-dim); font-size:1.2rem; background:none; border:none; color:var(--text-dim); }
+  .ph-form { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+  .ph-form label { font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:2px; }
+  .ph-form select, .ph-form input { background:var(--bg3); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'Inconsolata',monospace; font-size:13px; padding:8px 10px; width:100%; }
+  .ph-form select:focus, .ph-form input:focus { outline:none; border-color:var(--green); }
+  .ph-history { margin-top:8px; }
+  .ph-entry { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; }
+  .ph-entry:last-child { border-bottom:none; }
+  .ph-entry-bed { color:var(--text-dim); }
+  .ph-entry-val { font-weight:600; }
+  .ph-entry-date { font-size:10px; color:var(--text-dim); }
+  .ph-delete { background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:12px; padding:2px 6px; }
+  .ph-delete:hover { color:var(--red); }
+  .no-ph { color:var(--text-dim); font-size:12px; text-align:center; padding:1rem; }
+
   /* LOADING STATE */
   .loading-overlay {
     position: fixed;
@@ -515,6 +557,7 @@
         <div class="toggle-knob"></div>
       </div>
     </div>
+    <button class="btn" onclick="openPhModal()" style="font-size:11px;padding:5px 12px">🧪 Log pH</button>
   </div>
 
   <div class="sensor-grid" id="sensorGrid"></div>
@@ -522,6 +565,47 @@
   <div class="error-box" id="errorBox">
     <div class="error-title">Unable to fetch sensor data</div>
     <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <!-- pH LOG MODAL -->
+  <div class="modal-overlay" id="phModal">
+    <div class="modal">
+      <div class="modal-title">
+        <span>🧪 pH Log</span>
+        <button class="modal-close" onclick="closePhModal()">✕</button>
+      </div>
+      <div class="ph-form">
+        <div>
+          <label>Bed</label>
+          <select id="phBedSelect">
+            <option value="Bed 1 — Potato + Cucumbers">Bed 1 — Potato + Cucumbers</option>
+            <option value="Bed 2 — Watermelon + Potato">Bed 2 — Watermelon + Potato</option>
+            <option value="Bed 3 — Cucumbers + Tomatoes">Bed 3 — Cucumbers + Tomatoes</option>
+            <option value="Bed 4 — Cucumber + Peas + Roma">Bed 4 — Cucumber + Peas + Roma</option>
+            <option value="Bed 5 — Carrots">Bed 5 — Carrots</option>
+            <option value="Bed 6 — Beans + Alyssum + Basil">Bed 6 — Beans + Alyssum + Basil</option>
+            <option value="Bed 7 — Cucumbers + Banana Peppers">Bed 7 — Cucumbers + Banana Peppers</option>
+            <option value="Bed 8 — Habaneros">Bed 8 — Habaneros</option>
+            <option value="Bed 9 — Zinnias + Cabbage">Bed 9 — Zinnias + Cabbage</option>
+            <option value="Bed 10 — Cherokee Purple + Peppers">Bed 10 — Cherokee Purple + Peppers</option>
+            <option value="Blueberry Grow Bag">Blueberry Grow Bag</option>
+          </select>
+        </div>
+        <div>
+          <label>pH Reading</label>
+          <input type="number" id="phValue" min="0" max="14" step="0.1" placeholder="e.g. 6.5">
+        </div>
+        <div>
+          <label>Notes (optional)</label>
+          <input type="text" id="phNotes" placeholder="e.g. After lime application">
+        </div>
+        <button class="btn primary" onclick="logPh()">Save pH Reading</button>
+      </div>
+      <div class="ph-history">
+        <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">History</div>
+        <div id="phHistoryList"></div>
+      </div>
+    </div>
   </div>
 
   <footer>
@@ -540,42 +624,50 @@ const PROXY_URL = 'https://garden-proxy.lemmetalkwithjustin.workers.dev/';
 const PLANTS = [
   {
     ch: 1, name: 'Russet Potato + Space Masters', icon: '🥔', location: 'Bed 1',
-    type: 'raised', min: 55, max: 70, critMin: 45,
+    type: 'raised', min: 55, max: 70, critMin: 45, tempCh: null,
+    ecMin: 150, ecMax: 300,
     plants: ['🥔 Russet Potato ×1', '🥒 Space Master Cucumbers ×2']
   },
   {
     ch: 2, name: 'Watermelon + Russet Potato', icon: '🍉', location: 'Bed 2',
-    type: 'raised', min: 40, max: 60, critMin: 35,
+    type: 'raised', min: 40, max: 60, critMin: 35, tempCh: 1,
+    ecMin: 100, ecMax: 200,
     plants: ['🍉 Crimson Sweet Watermelon ×2', '🥔 Russet Potato ×1']
   },
   {
     ch: 3, name: 'Cucumbers + Tomatoes + Marigolds', icon: '🥒', location: 'Bed 3',
-    type: 'raised', min: 55, max: 70, critMin: 45,
+    type: 'raised', min: 55, max: 70, critMin: 45, tempCh: 2,
+    ecMin: 200, ecMax: 350,
     plants: ['🥒 Space Master Cucumbers ×3', '🍅 Roma Tomato ×1', '🍅 Sugar Bomb Cherry ×1', '🌼 African Marigolds ×3']
   },
   {
     ch: 4, name: 'Cucumber + Peas + Roma + Basil', icon: '🫛', location: 'Bed 4',
-    type: 'raised', min: 55, max: 70, critMin: 45,
+    type: 'raised', min: 55, max: 70, critMin: 45, tempCh: 3,
+    ecMin: 150, ecMax: 300,
     plants: ['🥒 Space Master Cucumber ×1', '🫛 Sugar Daddy Peas ×4-5', '🍅 Roma Tomato ×1', '🌼 African Marigolds ×2', '🌿 Basil ×1']
   },
   {
     ch: 5, name: 'Carrots', icon: '🥕', location: 'Bed 5',
-    type: 'raised', min: 50, max: 60, critMin: 40,
+    type: 'raised', min: 50, max: 60, critMin: 40, tempCh: null,
+    ecMin: 100, ecMax: 200,
     plants: ['🥕 Carrots (thinned, full bed)']
   },
   {
     ch: 6, name: 'Beans + Alyssum + Chives + Basil', icon: '🫘', location: 'Bed 6',
-    type: 'raised', min: 50, max: 65, critMin: 40,
+    type: 'raised', min: 50, max: 65, critMin: 40, tempCh: null,
+    ecMin: 100, ecMax: 250,
     plants: ['🫘 Jade Bush Beans ×4', '🌸 Sweet Alyssum ×1', '🌱 Chives', '🌿 Basil ×1']
   },
   {
     ch: 7, name: 'Space Masters + Banana Peppers', icon: '🥒', location: 'Bed 7',
-    type: 'raised', min: 55, max: 65, critMin: 45,
+    type: 'raised', min: 55, max: 65, critMin: 45, tempCh: null,
+    ecMin: 150, ecMax: 300,
     plants: ['🥒 Space Master Cucumbers ×2', '🌶️ Hot Banana Peppers ×2']
   },
   {
     ch: 8, name: 'Habanero Peppers', icon: '🌶️', location: 'Bed 8',
-    type: 'raised', min: 45, max: 60, critMin: 35,
+    type: 'raised', min: 45, max: 60, critMin: 35, tempCh: null,
+    ecMin: 150, ecMax: 300,
     plants: ['🌶️ Habanero Peppers ×1.5 (shared with Bed 7)']
   },
 ];
@@ -628,6 +720,68 @@ function getColor(status) {
   return { urgent: 'var(--red)', warning: 'var(--orange)', good: 'var(--green)', wet: 'var(--blue)', unknown: 'var(--text-dim)' }[status] || 'var(--text-dim)';
 }
 
+// ─── pH LOGGING ──────────────────────────────────────────
+function getPhHistory() {
+  try { return JSON.parse(localStorage.getItem('garden_ph_log') || '[]'); } catch { return []; }
+}
+
+function savePhHistory(arr) {
+  try { localStorage.setItem('garden_ph_log', JSON.stringify(arr)); } catch {}
+}
+
+function logPh() {
+  const bed = document.getElementById('phBedSelect').value;
+  const ph = parseFloat(document.getElementById('phValue').value);
+  const notes = document.getElementById('phNotes').value.trim();
+  if (!ph || ph < 0 || ph > 14) { alert('Please enter a valid pH between 0 and 14'); return; }
+  const history = getPhHistory();
+  history.unshift({ bed, ph, notes, ts: Date.now(), date: new Date().toLocaleDateString() });
+  savePhHistory(history);
+  document.getElementById('phValue').value = '';
+  document.getElementById('phNotes').value = '';
+  renderPhHistory();
+  // Refresh cards to show updated pH
+  if (sensorData.length) {
+    sensorData = sensorData.map(s => {
+      const phHistory = getPhHistory();
+      const bedPh = phHistory.filter(e => e.bed === s.location).sort((a,b) => b.ts - a.ts)[0];
+      return { ...s, latestPh: bedPh ? bedPh.ph : null };
+    });
+    renderCards();
+  }
+}
+
+function renderPhHistory() {
+  const list = document.getElementById('phHistoryList');
+  const history = getPhHistory();
+  if (!history.length) { list.innerHTML = '<div class="no-ph">No pH readings logged yet</div>'; return; }
+  list.innerHTML = history.slice(0, 30).map((e, i) => {
+    const cls = e.ph < 5.8 ? 'color:var(--orange)' : e.ph > 7.0 ? 'color:var(--blue)' : 'color:var(--green)';
+    return `<div class="ph-entry">
+      <span class="ph-entry-bed">${e.bed}</span>
+      <span class="ph-entry-val" style="${cls}">pH ${e.ph}</span>
+      <span class="ph-entry-date">${e.date}${e.notes ? ' · ' + e.notes : ''}</span>
+      <button class="ph-delete" onclick="deletePhEntry(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function deletePhEntry(i) {
+  const history = getPhHistory();
+  history.splice(i, 1);
+  savePhHistory(history);
+  renderPhHistory();
+}
+
+function openPhModal() {
+  renderPhHistory();
+  document.getElementById('phModal').classList.add('show');
+}
+
+function closePhModal() {
+  document.getElementById('phModal').classList.remove('show');
+}
+
 // ─── FETCH ───────────────────────────────────────────────
 async function fetchData() {
   document.getElementById('loader').classList.remove('hidden');
@@ -648,7 +802,29 @@ async function fetchData() {
       const raw = data[chKey]?.soilmoisture;
       const pct = raw ? parseFloat(raw.value) : null;
       const status = getStatus(pct, plant);
-      return { ...plant, pct, status };
+
+      // Parse soil temperature if WN34S assigned, or from WH52
+      let soilTemp = null;
+      if (plant.tempCh !== null) {
+        const tempKey = `temp_ch${plant.tempCh}`;
+        const tempRaw = data[tempKey]?.temp;
+        soilTemp = tempRaw ? parseFloat(tempRaw.value) : null;
+      }
+      // WH52 also reports temp in soil_ch
+      if (soilTemp === null) {
+        const soilTempRaw = data[`soil_ch${plant.ch}`]?.soiltemperature;
+        soilTemp = soilTempRaw ? parseFloat(soilTempRaw.value) : null;
+      }
+
+      // Parse EC from WH52 sensor
+      const ecRaw = data[`soil_ch${plant.ch}`]?.soilec || data[`soil_ch${plant.ch}`]?.ec;
+      const ec = ecRaw ? parseFloat(ecRaw.value) : null;
+
+      // Get latest pH from localStorage
+      const phHistory = getPhHistory();
+      const bedPh = phHistory.filter(e => e.bed === plant.location).sort((a,b) => b.ts - a.ts)[0];
+
+      return { ...plant, pct, status, soilTemp, ec, latestPh: bedPh ? bedPh.ph : null };
     });
 
     renderCards();
@@ -681,7 +857,13 @@ function loadDemoMode() {
   });
 
   const banner = document.getElementById('alertBanner');
-  banner.innerHTML = '⚠️ <strong>Demo Mode:</strong> Showing sample data — could not reach hub at 192.168.87.237. Make sure you are on your home WiFi. Channel assignments are based on your sensor installation order.';
+  // Add EC to demo data
+sensorData = sensorData.map((s, i) => ({
+  ...s,
+  soilTemp: [76.2, 82.4, 79.1, 74.8, 71.3, 78.9, 80.2, 83.1, null, null, null, null, null, null, null, null][i] || null,
+  ec: [180, null, 290, 210, 150, 170, 220, 240, null, null, null, null, null, null, null, null][i] || null,
+}));
+banner.innerHTML = '⚠️ <strong>Demo Mode:</strong> Showing sample data — could not reach Cloudflare proxy. Check your internet connection. Channel assignments are based on your sensor installation order.';
   banner.classList.add('show');
 
   renderCards();
@@ -720,6 +902,26 @@ function renderCards() {
           <div class="card-channel">CH${s.ch}</div>
         </div>
         ${plantList}
+        <div class="metrics-row">
+          ${s.soilTemp !== null ? (() => {
+            const t = s.soilTemp;
+            const cls = t >= 95 ? 'temp-hot' : t >= 85 ? 'temp-warn' : 'temp-ok';
+            const tip = t >= 95 ? '⚠️ Root danger' : t >= 85 ? 'Getting hot' : 'Good';
+            return `<div class="metric-chip ${cls}"><span class="metric-icon">🌡️</span><span class="metric-val">${t.toFixed(1)}°F</span><span class="metric-label">soil · ${tip}</span></div>`;
+          })() : ''}
+          ${s.ec !== null ? (() => {
+            const ec = s.ec;
+            const cls = ec < s.ecMin ? 'ec-low' : ec > s.ecMax ? 'ec-high' : 'ec-ok';
+            const tip = ec < s.ecMin ? 'Low — fertilize' : ec > s.ecMax ? 'High — salt buildup' : 'Good';
+            return `<div class="metric-chip ${cls}"><span class="metric-icon">⚡</span><span class="metric-val">${ec}μS</span><span class="metric-label">EC · ${tip}</span></div>`;
+          })() : ''}
+          ${s.latestPh !== null ? (() => {
+            const ph = s.latestPh;
+            const cls = ph < 5.8 ? 'ph-low' : ph > 7.0 ? 'ph-high' : 'ph-ok';
+            const tip = ph < 5.8 ? 'Too acidic' : ph > 7.0 ? 'Too alkaline' : 'Good';
+            return `<div class="metric-chip ${cls}" onclick="openPhModal()" style="cursor:pointer"><span class="metric-icon">🧪</span><span class="metric-val">pH ${ph}</span><span class="metric-label">${tip}</span></div>`;
+          })() : `<div class="metric-chip" onclick="openPhModal()" style="cursor:pointer"><span class="metric-icon">🧪</span><span class="metric-label" style="color:var(--text-dim)">Log pH →</span></div>`}
+        </div>
         <div class="moisture-display" style="margin-top:10px">
           <div class="moisture-num" style="color:${color}">${pctDisplay}</div>
           <div class="moisture-unit">%</div>

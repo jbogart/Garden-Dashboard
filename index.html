@@ -602,7 +602,7 @@
         <div class="toggle-knob"></div>
       </div>
     </div>
-    <button class="btn" onclick="openPhModal()" style="font-size:11px;padding:5px 12px">🧪 Log pH</button>
+    <button class="btn" onclick="event.stopPropagation();openPhModal()" style="font-size:11px;padding:5px 12px">🧪 Log pH</button>
   </div>
 
   <!-- TAB BAR -->
@@ -1277,21 +1277,50 @@ function savePhHistory(arr) {
 
 function logPh() {
   const bed = document.getElementById('phBedSelect').value;
-  const ph = parseFloat(document.getElementById('phValue').value);
+  const phVal = document.getElementById('phValue').value.trim();
+  const ph = parseFloat(phVal);
   const notes = document.getElementById('phNotes').value.trim();
-  if (!ph || ph < 0 || ph > 14) { alert('Please enter a valid pH between 0 and 14'); return; }
+
+  if (!phVal || isNaN(ph) || ph < 0 || ph > 14) {
+    alert('Please enter a valid pH value between 0 and 14');
+    return;
+  }
+
   const history = getPhHistory();
-  history.unshift({ bed, ph, notes, ts: Date.now(), date: new Date().toLocaleDateString() });
+  const entry = { bed, ph, notes, ts: Date.now(), date: new Date().toLocaleDateString() };
+  history.unshift(entry);
+
+  // Save and verify
   savePhHistory(history);
+  const verify = getPhHistory();
+  const saved = verify.length > 0 && verify[0].ts === entry.ts;
+
+  if (!saved) {
+    alert('Could not save pH reading — localStorage may be blocked. Try a different browser.');
+    return;
+  }
+
+  // Clear inputs
   document.getElementById('phValue').value = '';
   document.getElementById('phNotes').value = '';
+
+  // Show confirmation
+  const btn = document.querySelector('#phModal .btn.primary');
+  const origText = btn.textContent;
+  btn.textContent = '✅ Saved!';
+  btn.style.background = 'var(--green-dim)';
+  setTimeout(() => {
+    btn.textContent = origText;
+    btn.style.background = '';
+  }, 1500);
+
   renderPhHistory();
-  // Refresh cards to show updated pH
+
+  // Refresh sensor cards with updated pH
   if (sensorData.length) {
     sensorData = sensorData.map(s => {
-      const phHistory = getPhHistory();
-      const bedPh = phHistory.filter(e => e.bed === s.location).sort((a,b) => b.ts - a.ts)[0];
-      return { ...s, latestPh: bedPh ? bedPh.ph : null };
+      const latest = getPhHistory().filter(e => e.bed === s.location).sort((a,b) => b.ts - a.ts)[0];
+      return { ...s, latestPh: latest ? latest.ph : null };
     });
     renderCards();
   }
@@ -1319,8 +1348,18 @@ function deletePhEntry(i) {
   renderPhHistory();
 }
 
-function openPhModal() {
+function openPhModal(bedName) {
   renderPhHistory();
+  // Preselect bed if provided
+  if (bedName) {
+    const select = document.getElementById('phBedSelect');
+    for (let i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === bedName) {
+        select.selectedIndex = i;
+        break;
+      }
+    }
+  }
   document.getElementById('phModal').classList.add('show');
 }
 
@@ -1465,8 +1504,8 @@ function renderCards() {
             const ph = s.latestPh;
             const cls = ph < 5.8 ? 'ph-low' : ph > 7.0 ? 'ph-high' : 'ph-ok';
             const tip = ph < 5.8 ? 'Too acidic' : ph > 7.0 ? 'Too alkaline' : 'Good';
-            return `<div class="metric-chip ${cls}" onclick="openPhModal()" style="cursor:pointer"><span class="metric-icon">🧪</span><span class="metric-val">pH ${ph}</span><span class="metric-label">${tip}</span></div>`;
-          })() : `<div class="metric-chip" onclick="openPhModal()" style="cursor:pointer"><span class="metric-icon">🧪</span><span class="metric-label" style="color:var(--text-dim)">Log pH →</span></div>`}
+            return `<div class="metric-chip ${cls}" onclick="event.stopPropagation();openPhModal('${s.location}')" style="cursor:pointer"><span class="metric-icon">🧪</span><span class="metric-val">pH ${ph}</span><span class="metric-label">${tip}</span></div>`;
+          })() : `<div class="metric-chip" onclick="event.stopPropagation();openPhModal('${s.location}')" style="cursor:pointer"><span class="metric-icon">🧪</span><span class="metric-label" style="color:var(--text-dim)">Log pH →</span></div>`}
         </div>
         <div class="moisture-display" style="margin-top:10px">
           <div class="moisture-num" style="color:${color}">${pctDisplay}</div>

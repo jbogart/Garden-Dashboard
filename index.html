@@ -787,6 +787,11 @@ let currentChartPlant = null;
 let currentChartDays = 30;
 let seriesVisible = { moisture: true, temp: true, ec: true };
 
+function openChartByIndex(i) {
+  const plant = (currentFilter === 'all' ? sensorData : sensorData.filter(s => s.status === currentFilter))[i];
+  if (plant) openChart(plant);
+}
+
 function openChart(plant) {
   currentChartPlant = plant;
   currentChartDays = 30;
@@ -1215,7 +1220,7 @@ function renderCards() {
     const plantList = s.plants ? s.plants.map(p => `<div style="font-size:11px;color:var(--text-dim);margin-top:2px">${p}</div>`).join('') : '';
 
     return `
-      <div class="sensor-card ${s.status}" style="animation-delay:${delay}s" onclick="openChart(${JSON.stringify(s).replace(/'/g, '&#39;')})">
+      <div class="sensor-card ${s.status}" style="animation-delay:${delay}s" onclick="openChartByIndex(${i})">
         <div class="card-header">
           <div>
             <div class="card-icon">${s.icon}</div>

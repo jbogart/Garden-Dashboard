@@ -365,6 +365,8 @@
   .metric-chip.ec-high { border-color: rgba(255,68,68,0.4); }
   .metric-chip.ec-high .metric-val { color: var(--red); }
   .metric-chip.ec-ok .metric-val { color: var(--green); }
+  .metric-chip.palm { border-color: rgba(139,99,71,0.5); background: rgba(139,99,71,0.08); }
+  .metric-chip.palm .metric-label { color: rgba(196,149,106,0.8); }
 
   /* pH LOG MODAL */
   .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; align-items:center; justify-content:center; }
@@ -665,6 +667,12 @@
           <!-- Beds 1 & 2 — South fence, east corner (swapped: bed2 leftmost, bed1 rightmost) -->
 
 
+          <!-- Palm tree next to bed 1 east side -->
+          <g opacity="0.7">
+            <circle cx="773" cy="450" r="14" fill="#0A150A" stroke="#1A2A10" stroke-width="1.5"/>
+            <text x="773" y="454" font-size="14" font-family="Inconsolata" text-anchor="middle">🌴</text>
+          </g>
+
           <!-- Bed 1 (right, at east corner) -->
           <g id="mapBed1" onclick="mapBedClick(0)" style="cursor:pointer">
             <rect id="mapRect1" x="704" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
@@ -710,6 +718,12 @@
             <text id="mapPct4" x="306" y="530" fill="#3DFF6E" font-size="9" font-family="Syne,sans-serif" text-anchor="middle" font-weight="bold">—%</text>
           </g>
 
+          <!-- Palm tree next to bed 3 east side -->
+          <g opacity="0.7">
+            <circle cx="440" cy="450" r="14" fill="#0A150A" stroke="#1A2A10" stroke-width="1.5"/>
+            <text x="440" y="454" font-size="14" font-family="Inconsolata" text-anchor="middle">🌴</text>
+          </g>
+
           <!-- Bed 3 — just east of bed 4, west of firepit -->
           <g id="mapBed3" onclick="mapBedClick(2)" style="cursor:pointer">
             <rect id="mapRect3" x="346" y="490" width="80" height="44" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
@@ -727,6 +741,12 @@
           </g>
 
           <!-- Beds 7 & 8 — West fence (above bed 6) -->
+          <!-- Palm tree SW between beds 6 and 7 -->
+          <g opacity="0.7">
+            <circle cx="62" cy="450" r="14" fill="#0A150A" stroke="#1A2A10" stroke-width="1.5"/>
+            <text x="62" y="454" font-size="14" font-family="Inconsolata" text-anchor="middle">🌴</text>
+          </g>
+
           <!-- Bed 7 (lower, closer to bed 6) -->
           <g id="mapBed7" onclick="mapBedClick(6)" style="cursor:pointer">
             <rect id="mapRect7" x="16" y="390" width="44" height="80" rx="5" fill="#1A2A1A" stroke="#2A4A2A" stroke-width="1.5"/>
@@ -814,6 +834,7 @@
         <div class="map-legend-item"><div class="map-legend-dot" style="background:var(--green)"></div>Good (55–70%)</div>
         <div class="map-legend-item"><div class="map-legend-dot" style="background:var(--blue)"></div>Too Wet (&gt;70%)</div>
         <div class="map-legend-item"><div class="map-legend-dot" style="background:#1E2E1E;border:1px dashed #2A3A2A"></div>No Sensor</div>
+        <div class="map-legend-item"><span style="font-size:12px">🌴</span>Palm tree (high water competition)</div>
       </div>
     </div>
   </div>
@@ -913,7 +934,7 @@ const PLANTS = [
   {
     ch: 1, name: 'Russet Potato + Space Masters', icon: '🥔', location: 'Bed 1',
     type: 'raised', min: 55, max: 70, critMin: 45, tempCh: null,
-    ecMin: 150, ecMax: 300,
+    ecMin: 150, ecMax: 300, palmWarning: true, palmNote: 'Palm tree directly east',
     plants: ['🥔 Russet Potato ×1', '🥒 Space Master Cucumbers ×2']
   },
   {
@@ -925,7 +946,7 @@ const PLANTS = [
   {
     ch: 3, name: 'Cucumbers + Tomatoes + Marigolds', icon: '🥒', location: 'Bed 3',
     type: 'raised', min: 55, max: 70, critMin: 45, tempCh: 2,
-    ecMin: 200, ecMax: 350,
+    ecMin: 200, ecMax: 350, palmWarning: true, palmNote: 'Palm tree directly east',
     plants: ['🥒 Space Master Cucumbers ×3', '🍅 Roma Tomato ×1', '🍅 Sugar Bomb Cherry ×1', '🌼 African Marigolds ×3']
   },
   {
@@ -949,7 +970,7 @@ const PLANTS = [
   {
     ch: 7, name: 'Space Masters + Banana Peppers', icon: '🥒', location: 'Bed 7',
     type: 'raised', min: 55, max: 65, critMin: 45, tempCh: null,
-    ecMin: 150, ecMax: 300,
+    ecMin: 150, ecMax: 300, palmWarning: true, palmNote: 'Palm tree SW between beds 6 & 7',
     plants: ['🥒 Space Master Cucumbers ×2', '🌶️ Hot Banana Peppers ×2']
   },
   {
@@ -1538,6 +1559,7 @@ function renderCards() {
             const tip = t >= 95 ? '⚠️ Root danger' : t >= 85 ? 'Getting hot' : 'Good';
             return `<div class="metric-chip ${cls}"><span class="metric-icon">🌡️</span><span class="metric-val">${t.toFixed(1)}°F</span><span class="metric-label">soil · ${tip}</span></div>`;
           })() : ''}
+          ${s.palmWarning ? `<div class="metric-chip palm" title="${s.palmNote}"><span class="metric-icon">🌴</span><span class="metric-label">Palm roots nearby — high water demand expected</span></div>` : ''}
           ${s.ec !== null ? (() => {
             const ec = s.ec;
             const cls = ec < s.ecMin ? 'ec-low' : ec > s.ecMax ? 'ec-high' : 'ec-ok';

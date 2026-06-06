@@ -857,104 +857,19 @@
 
     <!-- KEY DATES -->
     <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:10px">🗓 Key Dates</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:1.5rem;">
-      ${[
-        { date:'Oct 1, 2026', action:'Order seed garlic', note:'Silverskin softneck — sells out fast', icon:'🧄', urgent:false },
-        { date:'Nov/Dec 2026', action:'Install root barriers', note:'Beds 1, 3 & 7 — palm side', icon:'🌴', urgent:true },
-        { date:'Nov/Dec 2026', action:'Build new beds A & B', note:'Herb/allium bed + tomato bed', icon:'🔨', urgent:false },
-        { date:'Oct–Nov 2026', action:'Plant garlic cloves', note:'2" deep, 6" apart, pointed up', icon:'🌱', urgent:false },
-        { date:'Dec 15, 2026', action:'Order strawberry crowns', note:'Seascape + San Andreas', icon:'🍓', urgent:false },
-        { date:'Dec 20, 2026', action:'Order all seeds', note:'Tomatoes, peppers, cucumbers, dill, onions', icon:'📦', urgent:false },
-        { date:'Jan 1, 2027', action:'Start tomatoes & peppers indoors', note:'8–10 weeks before transplant', icon:'🍅', urgent:false },
-        { date:'Jan 15, 2027', action:'Direct sow carrots & beets', note:'Bed 5 — cannot transplant', icon:'🥕', urgent:false },
-        { date:'Jan 15, 2027', action:'Plant strawberry crowns', note:'New strawberry bed', icon:'🍓', urgent:false },
-        { date:'Feb 15, 2027', action:'Start cucumbers & squash indoors', note:'3–4 weeks only', icon:'🥒', urgent:false },
-        { date:'Mar 1, 2027', action:'Transplant tomatoes outdoors', note:'Harden off 7 days first', icon:'🌱', urgent:false },
-        { date:'Mar 1, 2027', action:'Direct sow dill & beans', note:'Cannot transplant either', icon:'🌿', urgent:false },
-      ].map(d => `
-        <div style="background:var(--card);border:1px solid ${d.urgent ? 'rgba(255,140,66,0.4)' : 'var(--border)'};border-radius:10px;padding:12px;">
-          <div style="font-size:10px;color:${d.urgent ? 'var(--orange)' : 'var(--text-dim)'};text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">${d.date}</div>
-          <div style="font-size:13px;font-family:Syne,sans-serif;font-weight:700;color:var(--text);margin-bottom:3px;">${d.icon} ${d.action}</div>
-          <div style="font-size:11px;color:var(--text-dim);">${d.note}</div>
-        </div>
-      `).join('')}
-    </div>
+    <div id="planDates" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:1.5rem;"></div>
 
     <!-- BED ASSIGNMENTS -->
     <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:10px">🪴 2027 Bed Assignments</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:1.5rem;">
-      ${[
-        { bed:'Bed 1', icon:'🥔', sub:'East corner · Palm east', tags:['Russet Potato ×2','Marigolds'], palm:true, note:'Cucumbers removed — palm competition too high. Root barrier essential.' },
-        { bed:'Bed 2', icon:'🍉', sub:'East fence · No palm', tags:['Crimson Sweet Watermelon','Sugar Baby Watermelon','Nasturtium'], palm:false, note:'Dedicated watermelon bed. Two varieties for staggered harvest.' },
-        { bed:'Bed 3', icon:'🍅', sub:'South fence · Palm east', tags:['Cherokee Purple ×1','Brandywine ×1','Basil','Marigolds ×2'], palm:true, note:'Heirloom tomatoes replace cucumbers. Florida weave from day one.' },
-        { bed:'Bed 4', icon:'🥒', sub:'South fence · No palm', tags:['Space Master Cucumbers ×2','National Pickling ×2','Dill ×2','Sweet Alyssum'], palm:false, note:'Dedicated pickle bed — cucumbers and dill together.' },
-        { bed:'Bed 5', icon:'🥕', sub:'Under pergola · No palm', tags:['Nantes Carrots','Chioggia Beets','Daikon Radish','Chives'], palm:false, note:'Root vegetable bed. All direct sown. Two successions Jan + Sept.' },
-        { bed:'Bed 6', icon:'🫘', sub:'SW corner · Under pergola', tags:['Jade Bush Beans ×4','Sweet Alyssum','Basil'], palm:false, note:'Same proven combo. Two bean plantings spring and fall.' },
-        { bed:'Bed 7', icon:'🌶️', sub:'West fence · Palm SW', tags:['Poblano ×2','Sweet Banana ×2','Marigolds ×2'], palm:true, note:'Peppers replace cucumbers — handle palm competition better.' },
-        { bed:'Bed 8', icon:'🌶️', sub:'West fence · No palm', tags:['Habanero ×2','Arbol ×2','Jalapeño ×2','Marigolds'], palm:false, note:'Consolidated hot chile bed. May overwinter and skip 2028 replant.' },
-        { bed:'Bed 9', icon:'🍅', sub:'Center shade cloth', tags:['Roma Tomatoes ×2','Sugar Bomb Cherry ×1','Basil','Marigolds ×2'], palm:false, note:'Romas moved from grow bags — 30–40% better yield in ground.' },
-        { bed:'Bed 10', icon:'🍅', sub:'Center shade cloth', tags:['Cherokee Purple ×2','Banana Pepper ×1','Purple Zinnias ×2','Basil'], palm:false, note:'Reduced to 2 Cherokees — 3 was too crowded this season.' },
-        { bed:'New Bed A', icon:'🍅', sub:'Build Nov/Dec 2026', tags:['Roma Tomatoes ×2','Shishito ×2','Marigolds ×2'], palm:false, note:'Locate away from all palms. Shishitos are excellent SoCal producers.' },
-        { bed:'New Bed B', icon:'🧄', sub:'Herb/Allium — Build Nov/Dec 2026', tags:['Softneck Garlic ×20','Yellow Onions','Red Onions','Green Onions','Dill ×3','Oregano · Thyme · Chives'], palm:false, note:'Plant garlic Oct–Nov. Oregano and thyme are perennial in Murrieta.' },
-      ].map(b => `
-        <div style="background:var(--card);border:1px solid ${b.palm ? 'rgba(139,99,71,0.4)' : 'var(--border)'};border-radius:10px;overflow:hidden;">
-          <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
-            <div style="width:30px;height:30px;border-radius:7px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${b.icon}</div>
-            <div>
-              <div style="font-family:Syne,sans-serif;font-size:12px;font-weight:700;color:var(--text)">${b.bed}</div>
-              <div style="font-size:10px;color:var(--text-dim)">${b.sub}</div>
-            </div>
-          </div>
-          <div style="padding:10px 14px;">
-            ${b.tags.map(t => `<span style="display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;margin:2px;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim)">${t}</span>`).join('')}
-            ${b.palm ? '<div style="display:inline-flex;align-items:center;gap:4px;font-size:10px;background:rgba(139,99,71,0.1);border:1px solid rgba(139,99,71,0.3);color:#C4956A;padding:2px 8px;border-radius:99px;margin:4px 2px">🌴 Root barrier needed</div>' : ''}
-            <div style="font-size:11px;color:var(--text-dim);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);line-height:1.5">${b.note}</div>
-          </div>
-        </div>
-      `).join('')}
-    </div>
+    <div id="planBeds" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:1.5rem;"></div>
 
     <!-- GROW BAGS -->
     <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:10px">🛍 Grow Bag Assignments</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:1.5rem;">
-      ${[
-        { size:'20 gal ×2', name:'🍅 Sugar Bomb Cherry Tomatoes', tip:'Upsized from 15 gal. On wooden boards off gravel.' },
-        { size:'15 gal ×1', name:'🫐 Blueberry', tip:'Keep in bag for pH control. Acid fertilizer only.' },
-        { size:'25 gal ×1', name:'🍎 Gala Apple Tree', tip:'Elevate off gravel. Consider second low-chill apple for pollination.' },
-        { size:'10 gal ×2', name:'🌶️ Bell Peppers (red & green)', tip:'Keep mobile — move to shade during extreme heat spikes.' },
-        { size:'10 gal ×2', name:'🌶️ Shishito + Arbol overflow', tip:'If new bed A is full. Check in-bed performance first.' },
-        { size:'5 gal ×4', name:'🌿 Genovese Basil', tip:'Succession plant every 6 weeks near kitchen.' },
-        { size:'10 gal ×4', name:'🍓 Strawberry overflow', tip:'Root runners from bed plants potted up.' },
-        { size:'7 gal ×1', name:'🫒 Olive Tree', tip:'Removed from bed 2. Water every 7–10 days once established.' },
-      ].map(b => `
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;">
-          <div style="font-size:10px;color:#C4956A;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">${b.size}</div>
-          <div style="font-family:Syne,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px">${b.name}</div>
-          <div style="font-size:11px;color:var(--text-dim)">${b.tip}</div>
-        </div>
-      `).join('')}
-    </div>
+    <div id="planBags" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:1.5rem;"></div>
 
     <!-- NEW CROPS -->
     <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:10px">✨ New Crops for 2027</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:1.5rem;">
-      ${[
-        { emoji:'🧄', name:'Softneck Garlic', where:'New Bed B', tip:'Plant Oct–Nov. Silverskin variety stores 12 months. Buy seed garlic not grocery store.' },
-        { emoji:'🧅', name:'Mix of Onions', where:'New Bed B', tip:'Yellow for storage, red for fresh, scallions year-round. All thrive in Murrieta.' },
-        { emoji:'🌿', name:'Bouquet Dill', where:'Bed 4 + Herb Bed', tip:'Most bolt-resistant variety for warm climates. Succession sow every 6 weeks for continuous harvest.' },
-        { emoji:'🥒', name:'National Pickling Cucumber', where:'Bed 4', tip:'Classic pickling variety. Harvest at 3–4". Pair with Bouquet dill for perfect pickles.' },
-        { emoji:'🍅', name:'Brandywine Tomato', where:'Bed 3', tip:'Gold standard heirloom. Massive flavor. Florida weave from day one.' },
-        { emoji:'🍉', name:'Sugar Baby Watermelon', where:'Bed 2', tip:'Compact early variety. Pairs with Crimson Sweet for staggered harvest window.' },
-      ].map(c => `
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;position:relative;">
-          <div style="position:absolute;top:8px;right:8px;background:var(--green);color:var(--bg);font-size:8px;font-weight:700;letter-spacing:.1em;padding:2px 7px;border-radius:99px">NEW</div>
-          <div style="font-size:1.6rem;margin-bottom:6px">${c.emoji}</div>
-          <div style="font-family:Syne,sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${c.name}</div>
-          <div style="font-size:10px;color:#C4956A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">${c.where}</div>
-          <div style="font-size:11px;color:var(--text-dim);line-height:1.5">${c.tip}</div>
-        </div>
-      `).join('')}
-    </div>
+    <div id="planNewCrops" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:1.5rem;"></div>
 
   </div>
 
@@ -1833,6 +1748,7 @@ function switchTab(tab, btn) {
   const controls = document.getElementById('sensorControls');
   if (controls) controls.style.display = tab === 'sensors' ? 'flex' : 'none';
   if (tab === 'map') updateMap();
+  if (tab === 'plan') renderPlan();
 }
 
 // ─── MAP ──────────────────────────────────────────────────
@@ -1893,7 +1809,104 @@ function mapBedClick(index) {
   setTimeout(() => openChart(plant), 100);
 }
 
+// ─── 2027 PLAN RENDERER ──────────────────────────────────
+function renderPlan() {
+  // KEY DATES
+  const dates = [
+    { date:'Oct 1, 2026', action:'Order seed garlic', note:'Silverskin softneck — sells out fast', icon:'🧄', urgent:false },
+    { date:'Oct–Nov 2026', action:'Plant garlic cloves', note:'2" deep, 6" apart, pointed up', icon:'🌱', urgent:false },
+    { date:'Nov/Dec 2026', action:'Install root barriers', note:'Beds 1, 3 & 7 — palm-facing side', icon:'🌴', urgent:true },
+    { date:'Nov/Dec 2026', action:'Build new beds A & B', note:'Herb/allium bed + tomato bed', icon:'🔨', urgent:false },
+    { date:'Dec 15, 2026', action:'Order strawberry crowns', note:'Seascape + San Andreas', icon:'🍓', urgent:false },
+    { date:'Dec 20, 2026', action:'Order all seeds', note:'Tomatoes, peppers, cucumbers, dill, onions', icon:'📦', urgent:false },
+    { date:'Jan 1, 2027', action:'Start tomatoes & peppers indoors', note:'8–10 weeks before transplant', icon:'🍅', urgent:false },
+    { date:'Jan 15, 2027', action:'Direct sow carrots & beets', note:'Bed 5 — cannot transplant', icon:'🥕', urgent:false },
+    { date:'Jan 15, 2027', action:'Plant strawberry crowns', note:'New strawberry bed', icon:'🍓', urgent:false },
+    { date:'Feb 15, 2027', action:'Start cucumbers & squash indoors', note:'3–4 weeks only', icon:'🥒', urgent:false },
+    { date:'Mar 1, 2027', action:'Transplant tomatoes outdoors', note:'Harden off 7 days first', icon:'🌱', urgent:false },
+    { date:'Mar 1, 2027', action:'Direct sow dill & beans', note:'Cannot transplant either', icon:'🌿', urgent:false },
+  ];
+  document.getElementById('planDates').innerHTML = dates.map(d => `
+    <div style="background:var(--card);border:1px solid ${d.urgent ? 'rgba(255,140,66,0.4)' : 'var(--border)'};border-radius:10px;padding:12px;">
+      <div style="font-size:10px;color:${d.urgent ? 'var(--orange)' : 'var(--text-dim)'};text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${d.date}</div>
+      <div style="font-size:13px;font-family:'Syne',sans-serif;font-weight:700;color:var(--text);margin-bottom:3px">${d.icon} ${d.action}</div>
+      <div style="font-size:11px;color:var(--text-dim)">${d.note}</div>
+    </div>
+  `).join('');
+
+  // BED ASSIGNMENTS
+  const beds = [
+    { bed:'Bed 1', icon:'🥔', sub:'East corner · Palm east', tags:['Russet Potato ×2','Marigolds'], palm:true, note:'Cucumbers removed — palm competition too high. Root barrier essential.' },
+    { bed:'Bed 2', icon:'🍉', sub:'East fence · No palm', tags:['Crimson Sweet Watermelon','Sugar Baby Watermelon','Nasturtium'], palm:false, note:'Dedicated watermelon bed. Two varieties for staggered harvest.' },
+    { bed:'Bed 3', icon:'🍅', sub:'South fence · Palm east', tags:['Cherokee Purple ×1','Brandywine ×1','Basil','Marigolds ×2'], palm:true, note:'Heirloom tomatoes replace cucumbers. Florida weave from day one.' },
+    { bed:'Bed 4', icon:'🥒', sub:'South fence · No palm', tags:['Space Master ×2','National Pickling ×2','Dill ×2','Sweet Alyssum'], palm:false, note:'Dedicated pickle bed — cucumbers and dill together.' },
+    { bed:'Bed 5', icon:'🥕', sub:'Under pergola · No palm', tags:['Nantes Carrots','Chioggia Beets','Daikon Radish','Chives'], palm:false, note:'Root vegetable bed. All direct sown. Two successions Jan + Sept.' },
+    { bed:'Bed 6', icon:'🫘', sub:'SW corner · Under pergola', tags:['Jade Bush Beans ×4','Sweet Alyssum','Basil'], palm:false, note:'Same proven combo. Two bean plantings spring and fall.' },
+    { bed:'Bed 7', icon:'🌶️', sub:'West fence · Palm SW', tags:['Poblano ×2','Sweet Banana ×2','Marigolds ×2'], palm:true, note:'Peppers replace cucumbers — handle palm competition better.' },
+    { bed:'Bed 8', icon:'🌶️', sub:'West fence · No palm', tags:['Habanero ×2','Arbol ×2','Jalapeño ×2','Marigolds'], palm:false, note:'Consolidated hot chile bed. May overwinter and skip 2028 replant.' },
+    { bed:'Bed 9', icon:'🍅', sub:'Center shade cloth', tags:['Roma Tomatoes ×2','Sugar Bomb Cherry ×1','Basil','Marigolds ×2'], palm:false, note:'Romas moved from grow bags — 30-40% better yield in ground.' },
+    { bed:'Bed 10', icon:'🍅', sub:'Center shade cloth', tags:['Cherokee Purple ×2','Banana Pepper ×1','Purple Zinnias ×2','Basil'], palm:false, note:'Reduced to 2 Cherokees — 3 was too crowded this season.' },
+    { bed:'New Bed A', icon:'🍅', sub:'Build Nov/Dec 2026', tags:['Roma Tomatoes ×2','Shishito ×2','Marigolds ×2'], palm:false, note:'Locate away from all palms. Shishitos are excellent SoCal producers.' },
+    { bed:'New Bed B', icon:'🧄', sub:'Herb/Allium — Build Nov/Dec 2026', tags:['Softneck Garlic ×20','Yellow Onions','Red Onions','Green Onions','Dill ×3','Oregano · Thyme · Chives'], palm:false, note:'Plant garlic Oct–Nov. Oregano and thyme are perennial in Murrieta.' },
+  ];
+  document.getElementById('planBeds').innerHTML = beds.map(b => `
+    <div style="background:var(--card);border:1px solid ${b.palm ? 'rgba(139,99,71,0.4)' : 'var(--border)'};border-radius:10px;overflow:hidden;">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+        <div style="width:30px;height:30px;border-radius:7px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${b.icon}</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--text)">${b.bed}</div>
+          <div style="font-size:10px;color:var(--text-dim)">${b.sub}</div>
+        </div>
+      </div>
+      <div style="padding:10px 14px;">
+        ${b.tags.map(t => '<span style="display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;margin:2px;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim)">' + t + '</span>').join('')}
+        ${b.palm ? '<div style="display:inline-flex;align-items:center;gap:4px;font-size:10px;background:rgba(139,99,71,0.1);border:1px solid rgba(139,99,71,0.3);color:#C4956A;padding:2px 8px;border-radius:99px;margin:4px 2px">🌴 Root barrier needed</div>' : ''}
+        <div style="font-size:11px;color:var(--text-dim);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);line-height:1.5">${b.note}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // GROW BAGS
+  const bags = [
+    { size:'20 gal ×2', name:'🍅 Sugar Bomb Cherry Tomatoes', tip:'Upsized from 15 gal. On wooden boards off gravel.' },
+    { size:'15 gal ×1', name:'🫐 Blueberry', tip:'Keep in bag for pH control. Acid fertilizer only.' },
+    { size:'25 gal ×1', name:'🍎 Gala Apple Tree', tip:'Elevate off gravel. Consider second low-chill apple for pollination.' },
+    { size:'10 gal ×2', name:'🌶️ Bell Peppers (red & green)', tip:'Keep mobile — move to shade during extreme heat spikes.' },
+    { size:'10 gal ×2', name:'🌶️ Shishito + Arbol overflow', tip:'If new bed A is full. Check in-bed performance first.' },
+    { size:'5 gal ×4', name:'🌿 Genovese Basil', tip:'Succession plant every 6 weeks near kitchen.' },
+    { size:'10 gal ×4', name:'🍓 Strawberry overflow', tip:'Root runners from bed plants potted up.' },
+    { size:'7 gal ×1', name:'🫒 Olive Tree', tip:'Removed from bed 2. Water every 7-10 days once established.' },
+  ];
+  document.getElementById('planBags').innerHTML = bags.map(b => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;">
+      <div style="font-size:10px;color:#C4956A;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">${b.size}</div>
+      <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px">${b.name}</div>
+      <div style="font-size:11px;color:var(--text-dim)">${b.tip}</div>
+    </div>
+  `).join('');
+
+  // NEW CROPS
+  const newCrops = [
+    { emoji:'🧄', name:'Softneck Garlic', where:'New Bed B', tip:'Plant Oct-Nov. Silverskin stores 12 months. Buy seed garlic not grocery store.' },
+    { emoji:'🧅', name:'Mix of Onions', where:'New Bed B', tip:'Yellow for storage, red for fresh, scallions year-round. All thrive in Murrieta.' },
+    { emoji:'🌿', name:'Bouquet Dill', where:'Bed 4 + Herb Bed', tip:'Most bolt-resistant variety for warm climates. Succession sow every 6 weeks.' },
+    { emoji:'🥒', name:'National Pickling Cucumber', where:'Bed 4', tip:'Classic pickling variety. Harvest at 3-4". Pairs perfectly with Bouquet dill.' },
+    { emoji:'🍅', name:'Brandywine Tomato', where:'Bed 3', tip:'Gold standard heirloom. Massive flavor. Florida weave from day one.' },
+    { emoji:'🍉', name:'Sugar Baby Watermelon', where:'Bed 2', tip:'Compact early variety. Pairs with Crimson Sweet for staggered harvest.' },
+  ];
+  document.getElementById('planNewCrops').innerHTML = newCrops.map(c => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;position:relative;">
+      <div style="position:absolute;top:8px;right:8px;background:var(--green);color:var(--bg);font-size:8px;font-weight:700;letter-spacing:.1em;padding:2px 7px;border-radius:99px">NEW</div>
+      <div style="font-size:1.6rem;margin-bottom:6px">${c.emoji}</div>
+      <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${c.name}</div>
+      <div style="font-size:10px;color:#C4956A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">${c.where}</div>
+      <div style="font-size:11px;color:var(--text-dim);line-height:1.5">${c.tip}</div>
+    </div>
+  `).join('');
+}
+
 // ─── INIT ─────────────────────────────────────────────────
+renderPlan();
 fetchPhHistory().then(() => fetchData());
 </script>
 </body>

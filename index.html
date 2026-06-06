@@ -1296,16 +1296,22 @@ function renderChartStats(data, plant) {
   stats.innerHTML = html;
 }
 
-// ─── pH LOGGING ──────────────────────────────────────────
-function getPhHistory() {
-  try { return JSON.parse(localStorage.getItem('garden_ph_log') || '[]'); } catch { return []; }
+// ─── pH LOGGING — Cloud KV via Cloudflare Worker ─────────
+let phCache = []; // in-memory cache so we don't refetch constantly
+
+async function fetchPhHistory() {
+  try {
+    const res = await fetch(PROXY_URL + 'ph');
+    const data = await res.json();
+    phCache = Array.isArray(data) ? data : [];
+    return phCache;
+  } catch(err) {
+    console.error('Failed to fetch pH history:', err);
+    return phCache;
+  }
 }
 
-function savePhHistory(arr) {
-  try { localStorage.setItem('garden_ph_log', JSON.stringify(arr)); } catch {}
-}
-
-function logPh() {
+async function logPh() {
   const bed = document.getElementById('phBedSelect').value;
   const phVal = document.getElementById('phValue').value.trim();
   const ph = parseFloat(phVal);
@@ -1316,74 +1322,89 @@ function logPh() {
     return;
   }
 
-  const history = getPhHistory();
-  const entry = { bed, ph, notes, ts: Date.now(), date: new Date().toLocaleDateString() };
-  history.unshift(entry);
-
-  // Save and verify
-  savePhHistory(history);
-  const verify = getPhHistory();
-  const saved = verify.length > 0 && verify[0].ts === entry.ts;
-
-  if (!saved) {
-    alert('Could not save pH reading — localStorage may be blocked. Try a different browser.');
-    return;
-  }
-
-  // Clear inputs
-  document.getElementById('phValue').value = '';
-  document.getElementById('phNotes').value = '';
-
-  // Show confirmation
   const btn = document.querySelector('#phModal .btn.primary');
   const origText = btn.textContent;
-  btn.textContent = '✅ Saved!';
-  btn.style.background = 'var(--green-dim)';
-  setTimeout(() => {
-    btn.textContent = origText;
-    btn.style.background = '';
-  }, 1500);
+  btn.textContent = '⏳ Saving...';
+  btn.disabled = true;
 
-  renderPhHistory();
+  const entry = { bed, ph, notes, ts: Date.now(), date: new Date().toLocaleDateString() };
 
-  // Refresh sensor cards with updated pH
-  if (sensorData.length) {
-    sensorData = sensorData.map(s => {
-      const latest = getPhHistory().filter(e => e.bed === s.location).sort((a,b) => b.ts - a.ts)[0];
-      return { ...s, latestPh: latest ? latest.ph : null };
+  try {
+    const res = await fetch(PROXY_URL + 'ph', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry)
     });
-    renderCards();
+    const result = await res.json();
+    if (!result.ok) throw new Error('Save failed');
+
+    // Update cache
+    phCache.unshift(entry);
+
+    document.getElementById('phValue').value = '';
+    document.getElementById('phNotes').value = '';
+
+    btn.textContent = '✅ Saved!';
+    btn.style.background = 'var(--green-dim)';
+    setTimeout(() => {
+      btn.textContent = origText;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 1500);
+
+    renderPhHistory();
+
+    // Refresh sensor cards
+    if (sensorData.length) {
+      sensorData = sensorData.map(s => {
+        const latest = getLatestPhForBed(s.location);
+        return { ...s, latestPh: latest };
+      });
+      renderCards();
+    }
+  } catch(err) {
+    btn.textContent = '❌ Failed';
+    btn.style.background = 'var(--red)';
+    setTimeout(() => {
+      btn.textContent = origText;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 2000);
+    alert('Could not save pH reading. Check your internet connection.');
   }
+}
+
+function getLatestPhForBed(location) {
+  const match = phCache.filter(e => {
+    if (e.bed === location) return true;
+    const storedNum = e.bed.match(/^Bed (\d+)/i);
+    const locNum = location.match(/^Bed (\d+)/i);
+    return storedNum && locNum && storedNum[1] === locNum[1];
+  }).sort((a,b) => b.ts - a.ts)[0];
+  return match ? match.ph : null;
 }
 
 function renderPhHistory() {
   const list = document.getElementById('phHistoryList');
   const selectedBed = document.getElementById('phBedSelect').value;
-  const allHistory = getPhHistory();
 
-  // Debug: show all stored bed names vs selected
-  console.log('Selected bed:', selectedBed);
-  console.log('All stored beds:', allHistory.map(e => e.bed));
+  const label = document.getElementById('phHistoryLabel');
+  if (label) label.textContent = selectedBed + ' — History';
 
-  const history = allHistory.filter(e => {
+  const history = phCache.filter(e => {
     if (e.bed === selectedBed) return true;
     const storedNum = e.bed.match(/^Bed (\d+)/i);
     const selNum = selectedBed.match(/^Bed (\d+)/i);
     return storedNum && selNum && storedNum[1] === selNum[1];
   });
 
-  const label = document.getElementById('phHistoryLabel');
-  if (label) label.textContent = selectedBed + ' — History';
-
   if (!history.length) {
-    // Show stored bed names to help debug mismatches
-    const storedBeds = [...new Set(allHistory.map(e => e.bed))];
-    list.innerHTML = `<div class="no-ph">No pH readings for this bed yet.${storedBeds.length ? '<br><span style="font-size:10px;opacity:0.5">Logged beds: ' + storedBeds.join(', ') + '</span>' : ''}</div>`;
+    list.innerHTML = '<div class="no-ph">No pH readings logged for this bed yet.</div>';
     return;
   }
 
   list.innerHTML = history.slice(0, 30).map(e => {
-    const origIndex = allHistory.indexOf(e);
+    const origIndex = phCache.indexOf(e);
     const cls = e.ph < 5.8 ? 'color:var(--orange)' : e.ph > 7.0 ? 'color:var(--blue)' : 'color:var(--green)';
     return `<div class="ph-entry">
       <span class="ph-entry-val" style="${cls}">pH ${e.ph}</span>
@@ -1393,17 +1414,28 @@ function renderPhHistory() {
   }).join('');
 }
 
-function deletePhEntry(i) {
-  const history = getPhHistory();
-  history.splice(i, 1);
-  savePhHistory(history);
-  renderPhHistory();
+async function deletePhEntry(i) {
+  try {
+    await fetch(PROXY_URL + 'ph', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ index: i })
+    });
+    phCache.splice(i, 1);
+    renderPhHistory();
+    // Refresh cards
+    if (sensorData.length) {
+      sensorData = sensorData.map(s => ({ ...s, latestPh: getLatestPhForBed(s.location) }));
+      renderCards();
+    }
+  } catch(err) {
+    alert('Could not delete entry. Check your connection.');
+  }
 }
 
-function openPhModal(bedName) {
+async function openPhModal(bedName) {
   const select = document.getElementById('phBedSelect');
 
-  // Set dropdown FIRST before rendering history
   if (bedName) {
     for (let i = 0; i < select.options.length; i++) {
       const optVal = select.options[i].value;
@@ -1415,9 +1447,11 @@ function openPhModal(bedName) {
     }
   }
 
-  // Render history AFTER dropdown is set so filter uses correct value
-  renderPhHistory();
+  // Show modal immediately, load history from cloud
   document.getElementById('phModal').classList.add('show');
+  document.getElementById('phHistoryList').innerHTML = '<div class="no-ph">Loading...</div>';
+  await fetchPhHistory();
+  renderPhHistory();
 }
 
 function closePhModal() {
@@ -1462,19 +1496,10 @@ async function fetchData() {
       const ecRaw = data[`soil_ch${plant.ch}`]?.soilec || data[`soil_ch${plant.ch}`]?.ec;
       const ec = ecRaw ? parseFloat(ecRaw.value) : null;
 
-      // Get latest pH from localStorage — fuzzy match by bed number
-      const phHistory = getPhHistory();
-      const bedPh = phHistory
-        .filter(e => {
-          if (e.bed === plant.location) return true;
-          // Match by bed number e.g. "Bed 1" matches "Bed 1 — Potato + Cucumbers"
-          const storedNum = e.bed.match(/^Bed (\d+)/i);
-          const plantNum = plant.location.match(/^Bed (\d+)/i);
-          return storedNum && plantNum && storedNum[1] === plantNum[1];
-        })
-        .sort((a,b) => b.ts - a.ts)[0];
+      // Get latest pH from cloud cache
+      const latestPh = getLatestPhForBed(plant.location);
 
-      return { ...plant, pct, status, soilTemp, ec, latestPh: bedPh ? bedPh.ph : null };
+      return { ...plant, pct, status, soilTemp, ec, latestPh };
     });
 
     renderCards();
@@ -1748,7 +1773,7 @@ function mapBedClick(index) {
 }
 
 // ─── INIT ─────────────────────────────────────────────────
-fetchData();
+fetchPhHistory().then(() => fetchData());
 </script>
 </body>
 </html>

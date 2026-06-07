@@ -1132,9 +1132,13 @@ async function fetchChartData(plant, days) {
     const res = await fetch(PROXY_URL + '?url=' + encodeURIComponent(url));
     const json = await res.json();
 
+    console.log('History API response:', JSON.stringify(json).slice(0, 500));
+    console.log('Data keys:', Object.keys(json.data || {}));
+
     if (json.code !== 0) throw new Error(json.msg || 'API error');
 
     const chData = json.data?.[`soil_ch${plant.ch}`] || {};
+    console.log('Channel data for ch' + plant.ch + ':', JSON.stringify(chData).slice(0, 300));
 
     // History API returns {soilmoisture: {list: [{time, val}]}} format
     function extractSeries(field) {

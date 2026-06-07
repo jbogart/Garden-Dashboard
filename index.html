@@ -1079,15 +1079,22 @@ function openChart(plant) {
   currentChartDays = 30;
   document.getElementById('chartModalTitle').textContent = plant.name;
   document.getElementById('chartModalSub').textContent = `${plant.location} · CH${plant.ch} · Last 30 days`;
-  document.getElementById('chartModal').classList.add('show');
   document.getElementById('chartNoData').style.display = 'none';
+  document.getElementById('chartLoading').style.display = 'flex';
 
   // Update toggle button visibility based on sensor type
   const hasEc = plant.ecMin !== undefined;
   document.getElementById('toggleTemp').style.display = hasEc ? '' : 'none';
   document.getElementById('toggleEc').style.display = hasEc ? '' : 'none';
 
-  fetchChartData(plant, 30);
+  // Show modal first, THEN fetch and render after browser has painted
+  // so canvas has real dimensions (was 0x0 when modal was display:none)
+  document.getElementById('chartModal').classList.add('show');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      fetchChartData(plant, 30);
+    });
+  });
 }
 
 function closeChartModal() {
@@ -1100,7 +1107,7 @@ function setChartRange(days, btn) {
   document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('chartModalSub').textContent = `${currentChartPlant.location} · CH${currentChartPlant.ch} · Last ${days === 1 ? '24 hours' : days + ' days'}`;
-  fetchChartData(currentChartPlant, days);
+  requestAnimationFrame(() => fetchChartData(currentChartPlant, days));
 }
 
 function toggleSeries(series) {
@@ -1198,10 +1205,13 @@ async function fetchChartData(plant, days) {
 function renderChart(data, plant) {
   const canvas = document.getElementById('chartCanvas');
   const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth;
-  const H = canvas.offsetHeight;
+  const rect = canvas.getBoundingClientRect();
+  const W = rect.width || canvas.parentElement?.clientWidth || 600;
+  const H = rect.height || 320;
   canvas.width = W * window.devicePixelRatio;
   canvas.height = H * window.devicePixelRatio;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
   ctx.clearRect(0, 0, W, H);

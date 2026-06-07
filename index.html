@@ -1127,7 +1127,9 @@ async function fetchChartData(plant, days) {
     const startDate = new Date(endDate - days * 24 * 60 * 60 * 1000);
     const fmt = d => d.toISOString().slice(0,19).replace('T',' ');
 
-    const url = `https://api.ecowitt.net/api/v3/device/history?application_key=B149E116026DBE1EEB70EA8C24EEEB83&api_key=1d647789-d639-4c2b-afa9-1a01584a6b29&mac=6C:C8:40:13:39:AB&start_date=${encodeURIComponent(fmt(startDate))}&end_date=${encodeURIComponent(fmt(endDate))}&call_back=all&cycle_type=auto`;
+    // History API uses specific call_back fields unlike real-time API
+    // soilmoisture = WH51/WH52 moisture, soiltemperature = WH52 temp, soilec = WH52 EC
+    const url = `https://api.ecowitt.net/api/v3/device/history?application_key=B149E116026DBE1EEB70EA8C24EEEB83&api_key=1d647789-d639-4c2b-afa9-1a01584a6b29&mac=6C:C8:40:13:39:AB&start_date=${encodeURIComponent(fmt(startDate))}&end_date=${encodeURIComponent(fmt(endDate))}&call_back=soil&cycle_type=auto&soil_ch=${plant.ch}`;
 
     const res = await fetch(PROXY_URL + '?url=' + encodeURIComponent(url));
     const json = await res.json();
@@ -1135,9 +1137,22 @@ async function fetchChartData(plant, days) {
     console.log('History API response:', JSON.stringify(json).slice(0, 500));
     console.log('Data keys:', Object.keys(json.data || {}));
 
-    if (json.code !== 0) throw new Error(json.msg || 'API error');
+    // code 40016 = invalid call_back parameter
+    // code 40007 = no data for this time range yet
+    if (json.code === 40007) {
+      loading.style.display = 'none';
+      noData.style.display = 'flex';
+      noData.textContent = 'No historical data yet — sensors need a few more days of logging before charts appear.';
+      return;
+    }
+    if (json.code !== 0) throw new Error(`API error ${json.code}: ${json.msg}`);
 
-    const chData = json.data?.[`soil_ch${plant.ch}`] || {};
+    // History API with soil_ch param may return data under soil_ch{n} or directly
+    let chData = json.data?.[`soil_ch${plant.ch}`] || {};
+    // If empty, try the data root directly (some firmware versions)
+    if (!Object.keys(chData).length && json.data?.soilmoisture) {
+      chData = json.data;
+    }
     console.log('Channel data for ch' + plant.ch + ':', JSON.stringify(chData).slice(0, 300));
 
     // History API returns {soilmoisture: {list: [{time, val}]}} format

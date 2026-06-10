@@ -1361,7 +1361,7 @@ function renderChartStats(data, plant) {
   stats.innerHTML = html;
 }
 
-// ─── pH LOGGING — Cloud KV via Cloudflare Worker ─────────
+// ──── pH LOGGING — Cloud KV via Cloudflare Worker ─────────
 let phCache = []; // in-memory cache so we don't refetch constantly
 
 async function fetchPhHistory() {
@@ -1865,7 +1865,7 @@ function renderPlan() {
     </div>
   `).join('');
 
-  // BED ASSIGNMENTS
+  // BED ASSIGNMENTS -
   const beds = [
     { bed:'Bed 1', icon:'🥔', sub:'East corner · Palm east', tags:['Russet Potato ×2','Marigolds'], palm:true, note:'Cucumbers removed — palm competition too high. Root barrier essential.' },
     { bed:'Bed 2', icon:'🍉', sub:'East fence · No palm', tags:['Crimson Sweet Watermelon','Sugar Baby Watermelon','Nasturtium'], palm:false, note:'Dedicated watermelon bed. Two varieties for staggered harvest.' },

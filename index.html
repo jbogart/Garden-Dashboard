@@ -1265,14 +1265,21 @@ function renderChart(data, plant) {
   ctx.font = '10px Inconsolata';
   ctx.textAlign = 'center';
   const labelCount = Math.min(6, n);
-  for (let i = 0; i < labelCount; i++) {
-    const idx = Math.floor(i * (n - 1) / (labelCount - 1));
-    const x = PAD.left + (idx / (n - 1)) * chartW;
-    const d = labels[idx];
-    const str = currentChartDays <= 1
-      ? d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
-      : d.toLocaleDateString([], {month:'short', day:'numeric'});
-    ctx.fillText(str, x, H - 8);
+  if (n === 1) {
+    // Single point — show at center
+    const d = labels[0];
+    const str = d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    ctx.fillText(str, PAD.left + chartW / 2, H - 8);
+  } else {
+    for (let i = 0; i < labelCount; i++) {
+      const idx = Math.floor(i * (n - 1) / Math.max(1, labelCount - 1));
+      const x = PAD.left + (idx / (n - 1)) * chartW;
+      const d = labels[idx];
+      const str = currentChartDays <= 1
+        ? d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
+        : d.toLocaleDateString([], {month:'short', day:'numeric'});
+      ctx.fillText(str, x, H - 8);
+    }
   }
 
   // Draw series
@@ -1288,19 +1295,31 @@ function renderChart(data, plant) {
     ctx.lineJoin = 'round';
     ctx.beginPath();
     let started = false;
+    const span = Math.max(1, n - 1);
     vals.forEach((v, i) => {
       if (v === null) { started = false; return; }
-      const x = PAD.left + (i / (n - 1)) * chartW;
+      const x = PAD.left + (i / span) * chartW;
       const y = PAD.top + chartH - ((v - vMin) / range) * chartH;
-      if (!started) { ctx.moveTo(x, y); started = true; }
+      if (!started) {
+        ctx.moveTo(x, y);
+        started = true;
+        // Draw a dot for single points so they're visible
+        if (n === 1) {
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+        }
+      }
       else ctx.lineTo(x, y);
     });
     ctx.stroke();
 
     // Dots at last point
     const lastIdx = vals.map((v,i) => v !== null ? i : -1).filter(i => i >= 0).pop();
-    if (lastIdx !== undefined) {
-      const x = PAD.left + (lastIdx / (n - 1)) * chartW;
+    if (lastIdx !== undefined && n > 1) {
+      const x = PAD.left + (lastIdx / span) * chartW;
       const v = vals[lastIdx];
       const y = PAD.top + chartH - ((v - vMin) / range) * chartH;
       ctx.fillStyle = color;

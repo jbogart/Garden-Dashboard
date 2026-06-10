@@ -1130,68 +1130,33 @@ async function fetchChartData(plant, days) {
   noData.style.display = 'none';
 
   try {
-    const endDate = new Date();
-    const startDate = new Date(endDate - days * 24 * 60 * 60 * 1000);
-    const fmt = d => d.toISOString().slice(0,19).replace('T',' ');
-
-    // History API uses specific call_back fields unlike real-time API
-    // soilmoisture = WH51/WH52 moisture, soiltemperature = WH52 temp, soilec = WH52 EC
-    const url = `https://api.ecowitt.net/api/v3/device/history?application_key=B149E116026DBE1EEB70EA8C24EEEB83&api_key=1d647789-d639-4c2b-afa9-1a01584a6b29&mac=6C:C8:40:13:39:AB&start_date=${encodeURIComponent(fmt(startDate))}&end_date=${encodeURIComponent(fmt(endDate))}&call_back=soil&cycle_type=auto&soil_ch=${plant.ch}`;
-
-    const res = await fetch(PROXY_URL + '?url=' + encodeURIComponent(url));
+    // Pull from Cloudflare KV (where the Worker stores logged readings)
+    const res = await fetch(`${PROXY_URL}history?ch=${plant.ch}&days=${days}`);
+    if (!res.ok) throw new Error(`Worker returned HTTP ${res.status}`);
     const json = await res.json();
 
-    console.log('History API response:', JSON.stringify(json).slice(0, 500));
-    console.log('Data keys:', Object.keys(json.data || {}));
+    // Worker returns { ok: true, data: [{ts, moisture, temp, ec}, ...] }
+    if (!json.ok) throw new Error(json.error || 'Worker history error');
 
-    // code 40016 = invalid call_back parameter
-    // code 40007 = no data for this time range yet
-    if (json.code === 40007) {
+    const rows = Array.isArray(json.data) ? json.data : [];
+
+    if (!rows.length) {
       loading.style.display = 'none';
       noData.style.display = 'flex';
-      noData.textContent = 'No historical data yet — sensors need a few more days of logging before charts appear.';
+      noData.textContent = 'No historical data yet — sensors need a few more hours of logging before charts appear.';
       return;
     }
-    if (json.code !== 0) throw new Error(`API error ${json.code}: ${json.msg}`);
 
-    // History API with soil_ch param may return data under soil_ch{n} or directly
-    let chData = json.data?.[`soil_ch${plant.ch}`] || {};
-    // If empty, try the data root directly (some firmware versions)
-    if (!Object.keys(chData).length && json.data?.soilmoisture) {
-      chData = json.data;
-    }
-    console.log('Channel data for ch' + plant.ch + ':', JSON.stringify(chData).slice(0, 300));
-
-    // History API returns {soilmoisture: {list: [{time, val}]}} format
-    function extractSeries(field) {
-      const f = chData[field];
-      if (!f) return {};
-      // Try list format first
-      if (f.list && Array.isArray(f.list)) {
-        const out = {};
-        f.list.forEach(item => { if (item.time && item.val !== undefined) out[item.time] = item.val; });
-        return out;
-      }
-      // Try direct timestamp:value object format
-      if (typeof f === 'object') return f;
-      return {};
-    }
-
-    const moistureData = extractSeries('soilmoisture');
-    const tempData = extractSeries('soiltemperature');
-    const ecData = extractSeries('soilec') || extractSeries('ec');
-
-    const times = Object.keys(moistureData).sort();
-    if (!times.length) { loading.style.display = 'none'; noData.style.display = 'flex'; return; }
+    // Sort ascending by timestamp
+    const sorted = rows.slice().sort((a, b) => a.ts - b.ts);
 
     const chartData = {
-      labels: times.map(t => new Date(parseInt(t) * 1000)),
-      moisture: times.map(t => moistureData[t] !== undefined ? parseFloat(moistureData[t]) : null),
-      temp: times.map(t => tempData[t] !== undefined ? parseFloat(tempData[t]) : null),
-      ec: times.map(t => ecData[t] !== undefined ? parseFloat(ecData[t]) : null),
+      labels:   sorted.map(r => new Date(r.ts)),
+      moisture: sorted.map(r => r.moisture != null ? parseFloat(r.moisture) : null),
+      temp:     sorted.map(r => r.temp     != null ? parseFloat(r.temp)     : null),
+      ec:       sorted.map(r => r.ec       != null ? parseFloat(r.ec)       : null),
     };
 
-    console.log('fetchChartData success — entries:', entries.length, 'moisture sample:', chartData.moisture[0]);
     loading.style.display = 'none';
     renderChart(chartData, plant);
     renderChartStats(chartData, plant);
